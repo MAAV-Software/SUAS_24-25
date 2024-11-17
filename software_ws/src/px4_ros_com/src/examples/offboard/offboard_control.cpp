@@ -62,6 +62,11 @@ public:
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
 
+		global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
+            "/fmu/out/vehicle_global_position", 10,
+            std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
+		
+
 		offboard_setpoint_counter_ = 0;
 
 		auto timer_callback = [this]() -> void {
@@ -102,7 +107,11 @@ private:
 	rclcpp::Publisher<TrajectorySetpoint>::SharedPtr trajectory_setpoint_publisher_;
 	rclcpp::Publisher<VehicleCommand>::SharedPtr vehicle_command_publisher_;
 
+	// subcription to drone's position
+	rclcpp::Subscription<VehicleGlobalPosition>::SharedPtr global_position_subscriber_;
+
 	std::atomic<uint64_t> timestamp_;   //!< common synced timestamped
+	double current_x_, current_y_, current_z_; // Current position of the drone
 
 	uint64_t offboard_setpoint_counter_;   //!< counter for the number of setpoints sent
 	int num_calls;
@@ -111,6 +120,7 @@ private:
 	void publish_trajectory_setpoint(double x, double y, double z);
 	std::array<double, 3> get_point();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
+	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
 };
 
 /**
@@ -149,7 +159,8 @@ void OffboardControl::publish_offboard_control_mode()
 	offboard_control_mode_publisher_->publish(msg);
 }
 std::array<double, 3> OffboardControl::get_point() {
-	// get our current location and get next point based on that, for now do it stupid
+	// get our current location and get next point based on that
+	//
 	if(this->num_calls > 50)
 	{
 		this->num_calls+=1;
@@ -164,7 +175,19 @@ std::array<double, 3> OffboardControl::get_point() {
 		this->num_calls+=1;
 		return {0.0, 0.0, -5.0};
 	}
+
 };
+
+// gets drone pos
+void OffboardControl::global_position_callback(const VehicleGlobalPosition::SharedPtr msg)
+{
+    current_x_ = msg->lat; // Latitude
+    current_y_ = msg->lon; // Longitude
+    current_z_ = msg->alt; // Altitude
+
+	RCLCPP_INFO(this->get_logger(), "x: " + current_x_ + " y: " + current_y_ + " z: " + current_z_);
+}
+
 
 /**
  * @brief Publish a trajectory setpoint

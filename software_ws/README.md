@@ -30,3 +30,47 @@ Run gazebo with sdf (world) file
 Note: If drone does not load into world file, check that world definition matches world name on line 3
 
 ---------------------------------------------------
+
+Creating new random sdf (world) file
+1. cd into SUAS_24-25/software_ws/src/waypoint_generation
+2. python way_point_generation.py
+3. move sdf file to /PX4-Autopilot/Tools/simulation/gz/worlds
+
+---------------------------------------------------
+
+Check ros2 topics for vehicle_local_position
+1. source /opt/ros/humble/setup.bash 
+2. ros2 topic
+list
+ Now find important topics like
+fmu/out/vehicle_local_posiition
+fmu/out/vehicle_gps_posiition
+fmu/out/vehicle_global_position
+fmu/in/trajectory_setpoint
+
+
+---------------------------------------------------
+
+Running on nuc (likely siimilar to jetson)
+1. # Intel NUC Setup
+
+1. Setup NUC: 
+   a. Keyboard, HDMI cable, etc.
+2. log in manually to NUC, (username='maav', password='get pwnd'). 
+5. SHH into NUC by typing: 
+    a. ssh maav@<ip_address> 
+    b. password same as above: 'get pwnd'
+
+
+Cd /home/maav/SUAS-2023/software_ws
+source ./devel/setup.bash
+rosrun suas suas_hover
+
+suas.test_hover.cpp
+
+
+Source /opt/ros/noetic/setup.bash
+Roscore
+
+
+---------------------------------------------------
