@@ -1,0 +1,11 @@
+[0.000000] (-) TimerEvent: {}
+[0.001356] (-) JobUnselected: {'identifier': 'my_package'}
+[0.001472] (-) JobUnselected: {'identifier': 'px4_msgs'}
+[0.001494] (-) JobUnselected: {'identifier': 'simulation'}
+[0.001510] (-) JobUnselected: {'identifier': 'turtlesim'}
+[0.001527] (-) JobUnselected: {'identifier': 'turtlesim'}
+[0.001543] (-) JobUnselected: {'identifier': 'tutorial_package'}
+[0.001561] (px4_ros_com) JobQueued: {'identifier': 'px4_ros_com', 'dependencies': OrderedDict([('px4_msgs', '/home/maav/SUAS_24-25/install/px4_msgs')])}
+[0.001601] (px4_ros_com) JobStarted: {'identifier': 'px4_ros_com'}
+[0.063902] (px4_ros_com) JobEnded: {'identifier': 'px4_ros_com', 'rc': 1}
+[0.075904] (-) EventReactorShutdown: {}
