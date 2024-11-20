@@ -1,43 +1,3 @@
-/****************************************************************************
- *
- * Copyright 2020 PX4 Development Team. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its contributors
- * may be used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
-
-/**
- * @brief Offboard control example
- * @file offboard_control.cpp
- * @addtogroup examples
- * @author Mickey Cowden <info@cowden.tech>
- * @author Nuno Marques <nuno.marques@dronesolutions.io>
- */
-
 #include <px4_msgs/msg/offboard_control_mode.hpp>
 #include <px4_msgs/msg/trajectory_setpoint.hpp>
 #include <px4_msgs/msg/vehicle_command.hpp>
@@ -57,6 +17,8 @@ class OffboardControl : public rclcpp::Node
 public:
 	OffboardControl() : Node("offboard_control")
 	{
+        this->read_in_file();
+
 
 		offboard_control_mode_publisher_ = this->create_publisher<OffboardControlMode>("/fmu/in/offboard_control_mode", 10);
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
@@ -68,6 +30,7 @@ public:
 		
 
 		offboard_setpoint_counter_ = 0;
+
 
 		auto timer_callback = [this]() -> void {
 
@@ -114,11 +77,14 @@ private:
 	double current_x_, current_y_, current_z_; // Current position of the drone
 
 	uint64_t offboard_setpoint_counter_;   //!< counter for the number of setpoints sent
-	int num_calls;
 
 	void publish_offboard_control_mode();
 	void publish_trajectory_setpoint(double x, double y, double z);
+
+    void read_in_file();
 	std::array<double, 3> get_point();
+    vector<std::array<double, 3>> points;
+
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
 	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
 };
@@ -158,24 +124,38 @@ void OffboardControl::publish_offboard_control_mode()
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	offboard_control_mode_publisher_->publish(msg);
 }
-std::array<double, 3> OffboardControl::get_point() {
-	// get our current location and get next point based on that
-	//
-	if(this->num_calls > 50)
-	{
-		this->num_calls+=1;
-		if(this->num_calls > 100)
-		{
-			this->num_calls = 0;
-		}
-		return {5.0, 5.0, -5.0};
-	}
-	else 
-	{
-		this->num_calls+=1;
-		return {0.0, 0.0, -5.0};
-	}
+void OffboardControl::read_in_file() {
+    std::ifstream infile("way_points.txt");
+    std::string line;
+    std::vector<std::vector<double>> waypoints;
 
+    if (!infile) {
+        std::cerr << "Error opening file" << std::endl;
+        return 1;
+    }
+
+    // Skip the first two lines (headers)
+    std::getline(infile, line);  // "Total path length: ..."
+    std::getline(infile, line);  // "Total points: ..."
+
+    // Read each point and store in the waypoints vector
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        double x, y, angle;
+        
+        if (iss >> x >> y >> angle) { // Read the x, y, and angle values, we need to convert to xyz here or somewhere later
+        
+            this->points.push_back({x, y, angle});
+        }
+    }
+}
+
+std::array<double, 3> OffboardControl::get_point() {
+	 
+    // do a position check, if we're sutitably close to the point, then move to the next point by popping front of vector
+	
+
+    return this.points[0];
 };
 
 // gets drone pos
