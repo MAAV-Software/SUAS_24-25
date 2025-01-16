@@ -1,0 +1,77 @@
+[35m[1mConsolidate compiler generated dependencies of target offboard_control[0m
+[ 16%] Built target frame_transforms
+[ 16%] Built target ament_cmake_python_copy_px4_ros_com
+[ 33%] Built target vehicle_gps_position_listener
+[ 50%] Built target offboard_control_srv
+[ 66%] Built target sensor_combined_listener
+[ 83%] Built target debug_vect_advertiser
+[ 91%] [32mBuilding CXX object CMakeFiles/offboard_control.dir/src/examples/offboard/offboard_control.cpp.o[0m
+running egg_info
+writing px4_ros_com.egg-info/PKG-INFO
+writing dependency_links to px4_ros_com.egg-info/dependency_links.txt
+writing top-level names to px4_ros_com.egg-info/top_level.txt
+reading manifest file 'px4_ros_com.egg-info/SOURCES.txt'
+writing manifest file 'px4_ros_com.egg-info/SOURCES.txt'
+[ 91%] Built target ament_cmake_python_build_px4_ros_com_egg
+[100%] [32m[1mLinking CXX executable offboard_control[0m
+[100%] Built target offboard_control
+-- Install configuration: ""
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/sensor_combined_listener
+-- Set runtime path of "/home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/sensor_combined_listener" to ""
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/vehicle_gps_position_listener
+-- Set runtime path of "/home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/vehicle_gps_position_listener" to ""
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/debug_vect_advertiser
+-- Set runtime path of "/home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/debug_vect_advertiser" to ""
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/offboard_control
+-- Set runtime path of "/home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/offboard_control" to ""
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/offboard_control_srv
+-- Set runtime path of "/home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/offboard_control_srv" to ""
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/library_path.sh
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/library_path.dsv
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/include/px4_ros_com
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/include/px4_ros_com/frame_transforms.h
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/lib/libframe_transforms.so
+-- Set runtime path of "/home/maav/SUAS_24-25/install/px4_ros_com/lib/libframe_transforms.so" to ""
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//launch
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//launch/sensor_combined_listener.launch.py
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//launch/offboard_control_launch.yaml
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//test
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//test/test_output.py
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//test/__init__.py
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//test/pipeline_io_test.py
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com//test/test_input.py
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/pythonpath.sh
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/pythonpath.dsv
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com-0.1.0-py3.10.egg-info
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com-0.1.0-py3.10.egg-info/top_level.txt
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com-0.1.0-py3.10.egg-info/SOURCES.txt
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com-0.1.0-py3.10.egg-info/dependency_links.txt
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com-0.1.0-py3.10.egg-info/PKG-INFO
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com/__init__.py
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com/module_to_import.py
+Listing '/home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com'...
+Compiling '/home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com/__init__.py'...
+Compiling '/home/maav/SUAS_24-25/install/px4_ros_com/local/lib/python3.10/dist-packages/px4_ros_com/module_to_import.py'...
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/lib/px4_ros_com/offboard_control.py
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/ament_index/resource_index/package_run_dependencies/px4_ros_com
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/ament_index/resource_index/parent_prefix_path/px4_ros_com
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/ament_prefix_path.sh
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/ament_prefix_path.dsv
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/path.sh
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/environment/path.dsv
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/local_setup.bash
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/local_setup.sh
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/local_setup.zsh
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/local_setup.dsv
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/package.dsv
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/ament_index/resource_index/packages/px4_ros_com
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/export_frame_transformsExport.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/export_frame_transformsExport-noconfig.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/ament_cmake_export_dependencies-extras.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/ament_cmake_export_targets-extras.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/ament_cmake_export_include_directories-extras.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/ament_cmake_export_libraries-extras.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/px4_ros_comConfig.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/cmake/px4_ros_comConfig-version.cmake
+-- Installing: /home/maav/SUAS_24-25/install/px4_ros_com/share/px4_ros_com/package.xml

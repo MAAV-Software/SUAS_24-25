@@ -1,0 +1,45 @@
+[  8%] [32mBuilding CXX object CMakeFiles/offboard_control.dir/src/examples/offboard/offboard_control.cpp.o[0m
+[ 25%] Built target frame_transforms
+[ 41%] Built target vehicle_gps_position_listener
+[ 75%] Built target offboard_control_srv
+[ 75%] Built target sensor_combined_listener
+[ 75%] Built target ament_cmake_python_copy_px4_ros_com
+[ 91%] Built target debug_vect_advertiser
+running egg_info
+writing px4_ros_com.egg-info/PKG-INFO
+writing dependency_links to px4_ros_com.egg-info/dependency_links.txt
+writing top-level names to px4_ros_com.egg-info/top_level.txt
+reading manifest file 'px4_ros_com.egg-info/SOURCES.txt'
+writing manifest file 'px4_ros_com.egg-info/SOURCES.txt'
+[ 91%] Built target ament_cmake_python_build_px4_ros_com_egg
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:64:2:[m[K [01;31m[Kerror: [m[Kexpected ‘[01m[K;[m[K’ after struct definition
+   64 | }
+      |  [01;31m[K^[m[K
+      |  [32m[K;[m[K
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:[m[K In function ‘[01m[Kstd::vector<Point> read_waypoints(const string&)[m[K’:
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:248:33:[m[K [01;31m[Kerror: [m[Kvariable ‘[01m[Kstd::ifstream file[m[K’ has initializer but incomplete type
+  248 |     std::ifstream file(file_path[01;31m[K)[m[K;
+      |                                 [01;31m[K^[m[K
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:273:13:[m[K [01;31m[Kerror: [m[K‘[01m[KROS_INFO[m[K’ was not declared in this scope
+  273 |             [01;31m[KROS_INFO[m[K("Reading waypoints from txt file: x=%f, y=%f, z=%f", lat, lon, alt_ft);
+      |             [01;31m[K^~~~~~~~[m[K
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:274:25:[m[K [01;31m[Kerror: [m[K‘[01m[Kgeodetic2Enu[m[K’ was not declared in this scope
+  274 |                         [01;31m[Kgeodetic2Enu[m[K(lat, lon, alt_ft*.3048, &x, &y, &z);
+      |                         [01;31m[K^~~~~~~~~~~~[m[K
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:256:22:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Ka[m[K’ [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-variable-Wunused-variable]8;;[m[K]
+  256 |         const double [01;35m[Ka[m[K = 6378137.0;  // semi-major axis in meters
+      |                      [01;35m[K^[m[K
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:257:22:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kf[m[K’ [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-variable-Wunused-variable]8;;[m[K]
+  257 |         const double [01;35m[Kf[m[K = 1.0 / 298.257223563;  // flattening
+      |                      [01;35m[K^[m[K
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:283:9:[m[K [01;31m[Kerror: [m[K‘[01m[KROS_ERROR[m[K’ was not declared in this scope
+  283 |         [01;31m[KROS_ERROR[m[K("Unable to open waypoints file");
+      |         [01;31m[K^~~~~~~~~[m[K
+In file included from [01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:50[m[K:
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/geodetic_conv.hpp:[m[K At global scope:
+[01m[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/geodetic_conv.hpp:13:15:[m[K [01;35m[Kwarning: [m[K‘[01m[Kgeodetic_converter::kFlattening[m[K’ defined but not used [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-variable-Wunused-variable]8;;[m[K]
+   13 | static double [01;35m[KkFlattening[m[K = 1 / 298.257223563;
+      |               [01;35m[K^~~~~~~~~~~[m[K
+gmake[2]: *** [CMakeFiles/offboard_control.dir/build.make:76: CMakeFiles/offboard_control.dir/src/examples/offboard/offboard_control.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:254: CMakeFiles/offboard_control.dir/all] Error 2
+gmake: *** [Makefile:146: all] Error 2

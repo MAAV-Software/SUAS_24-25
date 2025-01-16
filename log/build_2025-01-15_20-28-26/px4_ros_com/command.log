@@ -1,0 +1,2 @@
+Invoking command in '/home/maav/SUAS_24-25/build/px4_ros_com': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/maav/SUAS_24-25/build/px4_ros_com -- -j8 -l8
+Invoked command in '/home/maav/SUAS_24-25/build/px4_ros_com' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/maav/SUAS_24-25/build/px4_ros_com -- -j8 -l8

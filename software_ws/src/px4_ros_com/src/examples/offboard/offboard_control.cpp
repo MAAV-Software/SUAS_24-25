@@ -42,8 +42,16 @@
 #include <px4_msgs/msg/trajectory_setpoint.hpp>
 #include <px4_msgs/msg/vehicle_command.hpp>
 #include <px4_msgs/msg/vehicle_control_mode.hpp>
+#include <px4_msgs/msg/vehicle_global_position.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <stdint.h>
+#include <Eigen/Dense>
+#include <fstream>
+// #include <geometry_msgs/PoseStamped.h>
+#include "geodetic_conv.hpp"
+
+// #include <GeographicLib/Geocentric.hpp>
+// #include <GeographicLib/LocalCartesian.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -51,6 +59,10 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 using namespace px4_msgs::msg;
+
+struct Point {
+	double x, y, z;
+};
 
 class OffboardControl : public rclcpp::Node
 {
@@ -61,8 +73,16 @@ public:
 		offboard_control_mode_publisher_ = this->create_publisher<OffboardControlMode>("/fmu/in/offboard_control_mode", 10);
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
+		
+		// setting initial reference to origin for now
+		geodetic_converter_.initialiseReference(0, 0, 0);
 
-		global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
+		auto node = rclcpp::Node::make_shared("vehicle_global_position_subscriber"); 
+		// auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data)); 
+		// qos.reliability(RMW_QOS); // Match this to the publisher
+		// auto subscription = node->create_subscription<VehicleGlobalPosition>("/fmu/out/vehicle_global_position", qos, 
+		// [](auto msg) { RCLCPP_INFO(this->get_logger(), "Received data: [%f, %f]", msg->lat, msg->long); });
+		global_position_subscriber_ = node->create_subscription<VehicleGlobalPosition>(
             "/fmu/out/vehicle_global_position", 10,
             std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
 		
@@ -82,9 +102,9 @@ public:
 			// offboard_control_mode needs to be paired with trajectory_setpoint
 			publish_offboard_control_mode();
 			// get x, y, z from our points function and then publish them
-			std::array<double, 3> result = get_point();
+			std::array<float, 3> result = get_point();
 			publish_trajectory_setpoint(result[0], result[1], result[2]);
-			RCLCPP_INFO(this->get_logger(), std::to_string(result[0]).c_str());
+			// RCLCPP_INFO(this->get_logger(), );
 			// sleep(10.0);
 			// publish_trajectory_setpoint(5.0, 5.0, -5.0);
 			// RCLCPP_INFO(this->get_logger(), "Second waypoint published.");
@@ -116,9 +136,11 @@ private:
 	uint64_t offboard_setpoint_counter_;   //!< counter for the number of setpoints sent
 	int num_calls;
 
+	geodetic_converter::GeodeticConverter geodetic_converter_;
+	
 	void publish_offboard_control_mode();
-	void publish_trajectory_setpoint(double x, double y, double z);
-	std::array<double, 3> get_point();
+	void publish_trajectory_setpoint(float x, float y, float z);
+	std::array<float, 3> get_point();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
 	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
 };
@@ -158,7 +180,7 @@ void OffboardControl::publish_offboard_control_mode()
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	offboard_control_mode_publisher_->publish(msg);
 }
-std::array<double, 3> OffboardControl::get_point() {
+std::array<float, 3> OffboardControl::get_point() {
 	// get our current location and get next point based on that
 	//
 	if(this->num_calls > 50)
@@ -184,8 +206,9 @@ void OffboardControl::global_position_callback(const VehicleGlobalPosition::Shar
     current_x_ = msg->lat; // Latitude
     current_y_ = msg->lon; // Longitude
     current_z_ = msg->alt; // Altitude
-
-	RCLCPP_INFO(this->get_logger(), "x: " + current_x_ + " y: " + current_y_ + " z: " + current_z_);
+	auto message = "x: " + std::to_string(current_x_) + " y: " + std::to_string(current_y_) + " z: " + std::to_string(current_z_);
+	RCLCPP_INFO(this->get_logger(), message.c_str());
+	std::cout << "{PE:AASE}";
 }
 
 
@@ -194,7 +217,7 @@ void OffboardControl::global_position_callback(const VehicleGlobalPosition::Shar
  *        For this example, it sends a trajectory setpoint to make the
  *        vehicle hover at 5 meters with a yaw angle of 180 degrees.
  */
-void OffboardControl::publish_trajectory_setpoint(double x, double y, double z)
+void OffboardControl::publish_trajectory_setpoint(float x, float y, float z)
 {
 	TrajectorySetpoint msg{};
 	msg.position = {x, y, z};
@@ -222,6 +245,50 @@ void OffboardControl::publish_vehicle_command(uint16_t command, float param1, fl
 	msg.from_external = true;
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	vehicle_command_publisher_->publish(msg);
+}
+
+
+// outputs in lat long height in meters
+std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_) {
+    std::ifstream file(file_path);
+    std::vector<Point> waypoints;
+
+    if (file.is_open()) {
+        std::string line;
+        std::getline(file, line);
+        std::getline(file, line);
+        // WGS84 ellipsoid parameters
+        const double a = 6378137.0;  // semi-major axis in meters
+        const double f = 1.0 / 298.257223563;  // flattening
+
+        // GeographicLib::Geocentric earth(a, f);
+        // GeographicLib::LocalCartesian proj(0, 0, 0, earth);
+
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            Point waypoint;
+
+            double lat, lon, alt_ft;
+            iss >> lat >> lon >> alt_ft;
+
+            double x, y, z;
+            //proj.Forward(lat, lon, alt_ft * 0.3048, x, y, z);
+
+
+            //RCLCPP_INFO(this->get_logger(), "Reading waypoints from txt file: x=%f, y=%f, z=%f", lat, lon, alt_ft);
+			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &x, &y, &z);
+            waypoint.x = x;
+			waypoint.y = y;
+			waypoint.z = z;
+            
+            waypoints.push_back(waypoint);
+        }
+        file.close();
+    } else {
+        //RCLCPP_ERROR(this->get_logger(), "Unable to open waypoints file");
+    }
+
+    return waypoints;
 }
 
 int main(int argc, char *argv[])

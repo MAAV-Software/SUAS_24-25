@@ -26,6 +26,9 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(rclpy REQUIRED)
 
+# add_subdirectory(/home/maav/SUAS_24-25/software_ws/src/geodetic_utils/geodetic_utils) # Link it to your project 
+# target_link_libraries(${px4_ros_com} PUBLIC geodetic_utils)
+
 #################
 # Setup targets #
 #################

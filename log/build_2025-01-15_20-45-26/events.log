@@ -1,0 +1,124 @@
+[0.000000] (-) TimerEvent: {}
+[0.000296] (-) JobUnselected: {'identifier': 'Eigen3'}
+[0.000361] (-) JobUnselected: {'identifier': 'geodetic_utils'}
+[0.000401] (-) JobUnselected: {'identifier': 'my_package'}
+[0.000442] (-) JobUnselected: {'identifier': 'px4_msgs'}
+[0.000491] (-) JobUnselected: {'identifier': 'simulation'}
+[0.000562] (-) JobUnselected: {'identifier': 'turtlesim'}
+[0.000606] (-) JobUnselected: {'identifier': 'turtlesim'}
+[0.000642] (-) JobUnselected: {'identifier': 'tutorial_package'}
+[0.000682] (px4_ros_com) JobQueued: {'identifier': 'px4_ros_com', 'dependencies': OrderedDict([('px4_msgs', '/home/maav/SUAS_24-25/install/px4_msgs')])}
+[0.000708] (px4_ros_com) JobStarted: {'identifier': 'px4_ros_com'}
+[0.010441] (px4_ros_com) JobProgress: {'identifier': 'px4_ros_com', 'progress': 'cmake'}
+[0.011131] (px4_ros_com) JobProgress: {'identifier': 'px4_ros_com', 'progress': 'build'}
+[0.012181] (px4_ros_com) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/maav/SUAS_24-25/build/px4_ros_com', '--', '-j8', '-l8'], 'cwd': '/home/maav/SUAS_24-25/build/px4_ros_com', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'maav'), ('XDG_SESSION_TYPE', 'wayland'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/home/maav/SUAS_24-25/software_ws/install/turtlesim/lib:/home/maav/SUAS_24-25/software_ws/install/px4_ros_com/lib:/home/maav/SUAS_24-25/software_ws/install/px4_msgs/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/maav'), ('OLDPWD', '/home/maav/SUAS_24-25/software_ws'), ('DESKTOP_SESSION', 'ubuntu'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('SYSTEMD_EXEC_PID', '10993'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('IM_CONFIG_PHASE', '1'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/maav/SUAS_24-25/software_ws/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'maav'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('USERNAME', 'maav'), ('TERM', 'xterm-256color'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:/home/maav/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/maav-ThinkPad-P50:@/tmp/.ICE-unix/1777,unix/maav-ThinkPad-P50:/tmp/.ICE-unix/1777'), ('XDG_MENU_PREFIX', 'gnome-'), ('GNOME_TERMINAL_SCREEN', '/org/gnome/Terminal/screen/619c8eea_4273_499d_820b_6c52e05ddd5e'), ('GNOME_SETUP_DISPLAY', ':1'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('DISPLAY', ':0'), ('LANG', 'en_US.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu'), ('XAUTHORITY', '/run/user/1000/.mutter-Xwaylandauth.4I0L02'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('GNOME_TERMINAL_SERVICE', ':1.269'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('AMENT_PREFIX_PATH', '/home/maav/SUAS_24-25/software_ws/install/turtlesim:/home/maav/SUAS_24-25/software_ws/install/px4_ros_com:/home/maav/SUAS_24-25/software_ws/install/px4_msgs:/home/maav/SUAS_24-25/software_ws/install/my_package:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('QT_ACCESSIBILITY', '1'), ('GDMSESSION', 'ubuntu'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/maav/SUAS_24-25/build/px4_ros_com'), ('LC_ALL', 'en_US.UTF-8'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('XDG_DATA_DIRS', '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/home/maav/SUAS_24-25/software_ws/install/turtlesim/local/lib/python3.10/dist-packages:/home/maav/SUAS_24-25/software_ws/install/px4_ros_com/local/lib/python3.10/dist-packages:/home/maav/SUAS_24-25/software_ws/install/px4_msgs/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('VTE_VERSION', '6800'), ('CMAKE_PREFIX_PATH', '/home/maav/SUAS_24-25/software_ws/install/turtlesim:/home/maav/SUAS_24-25/software_ws/install/px4_ros_com:/home/maav/SUAS_24-25/software_ws/install/px4_msgs:/home/maav/SUAS_24-25/software_ws/install/my_package:/opt/ros/humble')]), 'shell': False}
+[0.086883] (px4_ros_com) StdoutLine: {'line': b'\x1b[35m\x1b[1mConsolidate compiler generated dependencies of target offboard_control\x1b[0m\n'}
+[0.099320] (-) TimerEvent: {}
+[0.102683] (px4_ros_com) StdoutLine: {'line': b'[ 33%] Built target frame_transforms\n'}
+[0.102978] (px4_ros_com) StdoutLine: {'line': b'[ 33%] Built target debug_vect_advertiser\n'}
+[0.103139] (px4_ros_com) StdoutLine: {'line': b'[ 58%] Built target sensor_combined_listener\n'}
+[0.103683] (px4_ros_com) StdoutLine: {'line': b'[ 66%] Built target offboard_control_srv\n'}
+[0.103832] (px4_ros_com) StdoutLine: {'line': b'[ 83%] Built target vehicle_gps_position_listener\n'}
+[0.107645] (px4_ros_com) StdoutLine: {'line': b'[ 83%] Built target ament_cmake_python_copy_px4_ros_com\n'}
+[0.121129] (px4_ros_com) StdoutLine: {'line': b'[ 91%] \x1b[32mBuilding CXX object CMakeFiles/offboard_control.dir/src/examples/offboard/offboard_control.cpp.o\x1b[0m\n'}
+[0.199424] (-) TimerEvent: {}
+[0.299679] (-) TimerEvent: {}
+[0.399996] (-) TimerEvent: {}
+[0.412779] (px4_ros_com) StdoutLine: {'line': b'running egg_info\n'}
+[0.437180] (px4_ros_com) StdoutLine: {'line': b'writing px4_ros_com.egg-info/PKG-INFO\n'}
+[0.437683] (px4_ros_com) StdoutLine: {'line': b'writing dependency_links to px4_ros_com.egg-info/dependency_links.txt\n'}
+[0.438076] (px4_ros_com) StdoutLine: {'line': b'writing top-level names to px4_ros_com.egg-info/top_level.txt\n'}
+[0.500092] (-) TimerEvent: {}
+[0.504415] (px4_ros_com) StdoutLine: {'line': b"reading manifest file 'px4_ros_com.egg-info/SOURCES.txt'\n"}
+[0.505587] (px4_ros_com) StdoutLine: {'line': b"writing manifest file 'px4_ros_com.egg-info/SOURCES.txt'\n"}
+[0.542496] (px4_ros_com) StdoutLine: {'line': b'[ 91%] Built target ament_cmake_python_build_px4_ros_com_egg\n'}
+[0.600184] (-) TimerEvent: {}
+[0.700486] (-) TimerEvent: {}
+[0.800846] (-) TimerEvent: {}
+[0.901158] (-) TimerEvent: {}
+[1.001503] (-) TimerEvent: {}
+[1.101820] (-) TimerEvent: {}
+[1.202145] (-) TimerEvent: {}
+[1.302562] (-) TimerEvent: {}
+[1.402983] (-) TimerEvent: {}
+[1.503317] (-) TimerEvent: {}
+[1.603738] (-) TimerEvent: {}
+[1.704131] (-) TimerEvent: {}
+[1.804562] (-) TimerEvent: {}
+[1.904871] (-) TimerEvent: {}
+[2.005181] (-) TimerEvent: {}
+[2.105471] (-) TimerEvent: {}
+[2.205758] (-) TimerEvent: {}
+[2.306075] (-) TimerEvent: {}
+[2.406367] (-) TimerEvent: {}
+[2.506786] (-) TimerEvent: {}
+[2.607261] (-) TimerEvent: {}
+[2.707613] (-) TimerEvent: {}
+[2.807942] (-) TimerEvent: {}
+[2.908203] (-) TimerEvent: {}
+[3.008528] (-) TimerEvent: {}
+[3.108891] (-) TimerEvent: {}
+[3.209196] (-) TimerEvent: {}
+[3.309493] (-) TimerEvent: {}
+[3.409819] (-) TimerEvent: {}
+[3.510214] (-) TimerEvent: {}
+[3.610656] (-) TimerEvent: {}
+[3.711208] (-) TimerEvent: {}
+[3.811593] (-) TimerEvent: {}
+[3.911954] (-) TimerEvent: {}
+[3.928284] (px4_ros_com) StderrLine: {'line': b'\x1b[01m\x1b[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:\x1b[m\x1b[K In function \xe2\x80\x98\x1b[01m\x1b[Kstd::vector<Point> read_waypoints(const string&)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[3.928504] (px4_ros_com) StderrLine: {'line': b'\x1b[01m\x1b[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:275:25:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[Kgeodetic2Enu\x1b[m\x1b[K\xe2\x80\x99 was not declared in this scope\n'}
+[3.928694] (px4_ros_com) StderrLine: {'line': b'  275 |                         \x1b[01;31m\x1b[Kgeodetic2Enu\x1b[m\x1b[K(lat, lon, alt_ft*.3048, &x, &y, &z);\n'}
+[3.928836] (px4_ros_com) StderrLine: {'line': b'      |                         \x1b[01;31m\x1b[K^~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[3.928936] (px4_ros_com) StderrLine: {'line': b'\x1b[01m\x1b[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:257:22:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kunused variable \xe2\x80\x98\x1b[01m\x1b[Ka\x1b[m\x1b[K\xe2\x80\x99 [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-variable\x07-Wunused-variable\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[3.929097] (px4_ros_com) StderrLine: {'line': b'  257 |         const double \x1b[01;35m\x1b[Ka\x1b[m\x1b[K = 6378137.0;  // semi-major axis in meters\n'}
+[3.929214] (px4_ros_com) StderrLine: {'line': b'      |                      \x1b[01;35m\x1b[K^\x1b[m\x1b[K\n'}
+[3.929321] (px4_ros_com) StderrLine: {'line': b'\x1b[01m\x1b[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:258:22:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[Kunused variable \xe2\x80\x98\x1b[01m\x1b[Kf\x1b[m\x1b[K\xe2\x80\x99 [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-variable\x07-Wunused-variable\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[3.929417] (px4_ros_com) StderrLine: {'line': b'  258 |         const double \x1b[01;35m\x1b[Kf\x1b[m\x1b[K = 1.0 / 298.257223563;  // flattening\n'}
+[3.929572] (px4_ros_com) StderrLine: {'line': b'      |                      \x1b[01;35m\x1b[K^\x1b[m\x1b[K\n'}
+[4.012073] (-) TimerEvent: {}
+[4.112349] (-) TimerEvent: {}
+[4.212711] (-) TimerEvent: {}
+[4.312991] (-) TimerEvent: {}
+[4.413312] (-) TimerEvent: {}
+[4.513684] (-) TimerEvent: {}
+[4.614016] (-) TimerEvent: {}
+[4.714321] (-) TimerEvent: {}
+[4.814635] (-) TimerEvent: {}
+[4.914935] (-) TimerEvent: {}
+[5.015234] (-) TimerEvent: {}
+[5.115511] (-) TimerEvent: {}
+[5.215842] (-) TimerEvent: {}
+[5.316149] (-) TimerEvent: {}
+[5.416495] (-) TimerEvent: {}
+[5.516884] (-) TimerEvent: {}
+[5.617186] (-) TimerEvent: {}
+[5.717481] (-) TimerEvent: {}
+[5.817773] (-) TimerEvent: {}
+[5.918047] (-) TimerEvent: {}
+[6.018378] (-) TimerEvent: {}
+[6.118684] (-) TimerEvent: {}
+[6.219003] (-) TimerEvent: {}
+[6.319356] (-) TimerEvent: {}
+[6.419738] (-) TimerEvent: {}
+[6.520082] (-) TimerEvent: {}
+[6.620340] (-) TimerEvent: {}
+[6.720731] (-) TimerEvent: {}
+[6.821048] (-) TimerEvent: {}
+[6.921360] (-) TimerEvent: {}
+[7.021658] (-) TimerEvent: {}
+[7.121949] (-) TimerEvent: {}
+[7.222209] (-) TimerEvent: {}
+[7.322566] (-) TimerEvent: {}
+[7.342818] (px4_ros_com) StderrLine: {'line': b'In file included from \x1b[01m\x1b[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/offboard_control.cpp:51\x1b[m\x1b[K:\n'}
+[7.343097] (px4_ros_com) StderrLine: {'line': b'\x1b[01m\x1b[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/geodetic_conv.hpp:\x1b[m\x1b[K At global scope:\n'}
+[7.343261] (px4_ros_com) StderrLine: {'line': b'\x1b[01m\x1b[K/home/maav/SUAS_24-25/software_ws/src/px4_ros_com/src/examples/offboard/geodetic_conv.hpp:13:15:\x1b[m\x1b[K \x1b[01;35m\x1b[Kwarning: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[Kgeodetic_converter::kFlattening\x1b[m\x1b[K\xe2\x80\x99 defined but not used [\x1b[01;35m\x1b[K\x1b]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-variable\x07-Wunused-variable\x1b]8;;\x07\x1b[m\x1b[K]\n'}
+[7.343348] (px4_ros_com) StderrLine: {'line': b'   13 | static double \x1b[01;35m\x1b[KkFlattening\x1b[m\x1b[K = 1 / 298.257223563;\n'}
+[7.343490] (px4_ros_com) StderrLine: {'line': b'      |               \x1b[01;35m\x1b[K^~~~~~~~~~~\x1b[m\x1b[K\n'}
+[7.395388] (px4_ros_com) StderrLine: {'line': b'gmake[2]: *** [CMakeFiles/offboard_control.dir/build.make:76: CMakeFiles/offboard_control.dir/src/examples/offboard/offboard_control.cpp.o] Error 1\n'}
+[7.395757] (px4_ros_com) StderrLine: {'line': b'gmake[1]: *** [CMakeFiles/Makefile2:254: CMakeFiles/offboard_control.dir/all] Error 2\n'}
+[7.396151] (px4_ros_com) StderrLine: {'line': b'gmake: *** [Makefile:146: all] Error 2\n'}
+[7.398553] (px4_ros_com) CommandEnded: {'returncode': 2}
+[7.422667] (-) TimerEvent: {}
+[7.470448] (px4_ros_com) JobEnded: {'identifier': 'px4_ros_com', 'rc': 2}
+[7.481490] (-) EventReactorShutdown: {}
