@@ -16,8 +16,8 @@ Terminal 3:
 
 Terminal 4:
 1. cd into SUAS_24-25/software_ws
-2. colcon build --packages-select px4_ros_com
-3. source /opt/ros/humble/setup.bash 
+2. source /opt/ros/humble/setup.bash
+3. colcon build --packages-select px4_ros_com 
 4. source install/setup.bash 
 5. ros2 run px4_ros_com offboard_control
 

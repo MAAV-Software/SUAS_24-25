@@ -49,6 +49,7 @@
 #include <fstream>
 // #include <geometry_msgs/PoseStamped.h>
 #include "geodetic_conv.hpp"
+#include <cmath>
 
 // #include <GeographicLib/Geocentric.hpp>
 // #include <GeographicLib/LocalCartesian.hpp>
@@ -67,7 +68,7 @@ struct Point {
 class OffboardControl : public rclcpp::Node
 {
 public:
-	OffboardControl() : Node("offboard_control")
+	OffboardControl() : Node("offboard_control"), curr_target(0)
 	{
 
 		offboard_control_mode_publisher_ = this->create_publisher<OffboardControlMode>("/fmu/in/offboard_control_mode", 10);
@@ -76,6 +77,10 @@ public:
 		
 		// setting initial reference to origin for now
 		geodetic_converter_.initialiseReference(0, 0, 0);
+
+		// getting list of waypoints
+		std::string waypointFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/way_points.txt";
+		std::vector<Point> waypoints = read_waypoints(waypointFilePath, geodetic_converter_);
 
 		auto node = rclcpp::Node::make_shared("vehicle_global_position_subscriber"); 
 		// auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data)); 
@@ -102,8 +107,8 @@ public:
 			// offboard_control_mode needs to be paired with trajectory_setpoint
 			publish_offboard_control_mode();
 			// get x, y, z from our points function and then publish them
-			std::array<float, 3> result = get_point();
-			publish_trajectory_setpoint(result[0], result[1], result[2]);
+			Point result = get_point();
+			publish_trajectory_setpoint(result.x, result.y, result.z);
 			// RCLCPP_INFO(this->get_logger(), );
 			// sleep(10.0);
 			// publish_trajectory_setpoint(5.0, 5.0, -5.0);
@@ -130,6 +135,10 @@ private:
 	// subcription to drone's position
 	rclcpp::Subscription<VehicleGlobalPosition>::SharedPtr global_position_subscriber_;
 
+	// list of waypoints
+	std::vector<Point> waypoints;
+	int curr_target;
+
 	std::atomic<uint64_t> timestamp_;   //!< common synced timestamped
 	double current_x_, current_y_, current_z_; // Current position of the drone
 
@@ -140,9 +149,10 @@ private:
 	
 	void publish_offboard_control_mode();
 	void publish_trajectory_setpoint(float x, float y, float z);
-	std::array<float, 3> get_point();
+	Point get_point();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
-	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
+	Point global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
+	std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter geodetic_converter_);
 };
 
 /**
@@ -180,28 +190,55 @@ void OffboardControl::publish_offboard_control_mode()
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	offboard_control_mode_publisher_->publish(msg);
 }
-std::array<float, 3> OffboardControl::get_point() {
+Point OffboardControl::get_point() {
 	// get our current location and get next point based on that
-	//
-	if(this->num_calls > 50)
-	{
-		this->num_calls+=1;
-		if(this->num_calls > 100)
-		{
-			this->num_calls = 0;
-		}
-		return {5.0, 5.0, -5.0};
-	}
-	else 
-	{
-		this->num_calls+=1;
-		return {0.0, 0.0, -5.0};
-	}
+	//if we're not there not yet, keep heading there (allowing for some deadzone[10 meters])
+	// once we are in range, set our target waypoint to the next waypoint
+
+	// Point curr_pos = global_position_callback(global_position_subscriber_);
+
+	// get distance between curr_pos and curr_target
+	Point target_point = waypoints[curr_target];
+	// double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
+	// 										pow((curr_pos.y - target_point.y), 2) + 
+	// 										pow((curr_pos.z - target_point.z), 2));
+
+	// if we're not close enough to target waypoint, keep going
+	// const int waypoint_range = 10;
+	// if (distance_from_target > waypoint_range) {
+		return target_point;
+	// }
+	// else {
+	// 	// if we've reached the last waypoint, go back to (0, 0, 0)
+	// 	if(curr_target == waypoints.size() - 1) {
+	// 		// Point origin = {0, 0, 0};
+	// 		// return origin;
+	// 		curr_target = 0;
+	// 		return waypoints[curr_target];
+	// 	}
+	// 	curr_target++;
+	// 	return waypoints[curr_target];
+	// }
+
+	// if(this->num_calls > 50)
+	// {
+	// 	this->num_calls+=1;
+	// 	if(this->num_calls > 100)
+	// 	{
+	// 		this->num_calls = 0;
+	// 	}
+	// 	return {5.0, 5.0, -5.0};
+	// }
+	// else 
+	// {
+	// 	this->num_calls+=1;
+	// 	return {0.0, 0.0, -5.0};
+	// }
 
 };
 
 // gets drone pos
-void OffboardControl::global_position_callback(const VehicleGlobalPosition::SharedPtr msg)
+Point OffboardControl::global_position_callback(const VehicleGlobalPosition::SharedPtr msg)
 {
     current_x_ = msg->lat; // Latitude
     current_y_ = msg->lon; // Longitude
@@ -209,6 +246,11 @@ void OffboardControl::global_position_callback(const VehicleGlobalPosition::Shar
 	auto message = "x: " + std::to_string(current_x_) + " y: " + std::to_string(current_y_) + " z: " + std::to_string(current_z_);
 	RCLCPP_INFO(this->get_logger(), message.c_str());
 	std::cout << "{PE:AASE}";
+	Point curr_pos;
+	curr_pos.x = current_x_;
+	curr_pos.y = current_y_;
+	curr_pos.z = current_z_;
+	return curr_pos;
 }
 
 
@@ -249,7 +291,7 @@ void OffboardControl::publish_vehicle_command(uint16_t command, float param1, fl
 
 
 // outputs in lat long height in meters
-std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_) {
+std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter geodetic_converter_) {
     std::ifstream file(file_path);
     std::vector<Point> waypoints;
 
@@ -258,8 +300,8 @@ std::vector<Point> read_waypoints(const std::string& file_path, geodetic_convert
         std::getline(file, line);
         std::getline(file, line);
         // WGS84 ellipsoid parameters
-        const double a = 6378137.0;  // semi-major axis in meters
-        const double f = 1.0 / 298.257223563;  // flattening
+        // const double a = 6378137.0;  // semi-major axis in meters
+        // const double f = 1.0 / 298.257223563;  // flattening
 
         // GeographicLib::Geocentric earth(a, f);
         // GeographicLib::LocalCartesian proj(0, 0, 0, earth);
