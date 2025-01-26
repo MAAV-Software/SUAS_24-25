@@ -10,7 +10,7 @@ static double kSemimajorAxis = 6378137;
 static double kSemiminorAxis = 6356752.3142;
 static double kFirstEccentricitySquared = 6.69437999014 * 0.001;
 static double kSecondEccentricitySquared = 6.73949674228 * 0.001;
-// static double kFlattening = 1 / 298.257223563;
+static double kFlattening = 1 / 298.257223563;
 
 class GeodeticConverter
 {

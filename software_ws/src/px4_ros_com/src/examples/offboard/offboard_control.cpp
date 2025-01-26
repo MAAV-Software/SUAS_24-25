@@ -195,30 +195,30 @@ Point OffboardControl::get_point() {
 	//if we're not there not yet, keep heading there (allowing for some deadzone[10 meters])
 	// once we are in range, set our target waypoint to the next waypoint
 
-	// Point curr_pos = global_position_callback(global_position_subscriber_);
+	Point curr_pos = global_position_callback(global_position_subscriber_);
 
 	// get distance between curr_pos and curr_target
 	Point target_point = waypoints[curr_target];
-	// double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
-	// 										pow((curr_pos.y - target_point.y), 2) + 
-	// 										pow((curr_pos.z - target_point.z), 2));
+	double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
+											pow((curr_pos.y - target_point.y), 2) + 
+											pow((curr_pos.z - target_point.z), 2));
 
 	// if we're not close enough to target waypoint, keep going
-	// const int waypoint_range = 10;
-	// if (distance_from_target > waypoint_range) {
+	const int waypoint_range = 10;
+	if (distance_from_target > waypoint_range) {
 		return target_point;
-	// }
-	// else {
-	// 	// if we've reached the last waypoint, go back to (0, 0, 0)
-	// 	if(curr_target == waypoints.size() - 1) {
-	// 		// Point origin = {0, 0, 0};
-	// 		// return origin;
-	// 		curr_target = 0;
-	// 		return waypoints[curr_target];
-	// 	}
-	// 	curr_target++;
-	// 	return waypoints[curr_target];
-	// }
+	}
+	else {
+		// if we've reached the last waypoint, go back to (0, 0, 0)
+		if(curr_target == waypoints.size() - 1) {
+			// Point origin = {0, 0, 0};
+			// return origin;
+			curr_target = 0;
+			return waypoints[curr_target];
+		}
+		curr_target++;
+		return waypoints[curr_target];
+	}
 
 	// if(this->num_calls > 50)
 	// {
@@ -300,8 +300,8 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
         std::getline(file, line);
         std::getline(file, line);
         // WGS84 ellipsoid parameters
-        // const double a = 6378137.0;  // semi-major axis in meters
-        // const double f = 1.0 / 298.257223563;  // flattening
+        const double a = 6378137.0;  // semi-major axis in meters
+        const double f = 1.0 / 298.257223563;  // flattening
 
         // GeographicLib::Geocentric earth(a, f);
         // GeographicLib::LocalCartesian proj(0, 0, 0, earth);
