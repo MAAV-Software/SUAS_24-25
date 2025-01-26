@@ -191,49 +191,49 @@ void OffboardControl::publish_offboard_control_mode()
 	offboard_control_mode_publisher_->publish(msg);
 }
 Point OffboardControl::get_point() {
-	// get our current location and get next point based on that
-	//if we're not there not yet, keep heading there (allowing for some deadzone[10 meters])
-	// once we are in range, set our target waypoint to the next waypoint
+	// // get our current location and get next point based on that
+	// //if we're not there not yet, keep heading there (allowing for some deadzone[10 meters])
+	// // once we are in range, set our target waypoint to the next waypoint
 
-	Point curr_pos = global_position_callback(global_position_subscriber_);
+	// Point curr_pos = global_position_callback(global_position_subscriber_);
 
-	// get distance between curr_pos and curr_target
-	Point target_point = waypoints[curr_target];
-	double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
-											pow((curr_pos.y - target_point.y), 2) + 
-											pow((curr_pos.z - target_point.z), 2));
+	// // get distance between curr_pos and curr_target
+	// Point target_point = waypoints[curr_target];
+	// double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
+	// 										pow((curr_pos.y - target_point.y), 2) + 
+	// 										pow((curr_pos.z - target_point.z), 2));
 
-	// if we're not close enough to target waypoint, keep going
-	const int waypoint_range = 10;
-	if (distance_from_target > waypoint_range) {
-		return target_point;
-	}
-	else {
-		// if we've reached the last waypoint, go back to (0, 0, 0)
-		if(curr_target == waypoints.size() - 1) {
-			// Point origin = {0, 0, 0};
-			// return origin;
-			curr_target = 0;
-			return waypoints[curr_target];
-		}
-		curr_target++;
-		return waypoints[curr_target];
-	}
-
-	// if(this->num_calls > 50)
-	// {
-	// 	this->num_calls+=1;
-	// 	if(this->num_calls > 100)
-	// 	{
-	// 		this->num_calls = 0;
+	// // if we're not close enough to target waypoint, keep going
+	// const int waypoint_range = 10;
+	// if (distance_from_target > waypoint_range) {
+	// 	return target_point;
+	// }
+	// else {
+	// 	// if we've reached the last waypoint, go back to (0, 0, 0)
+	// 	if(curr_target == waypoints.size() - 1) {
+	// 		// Point origin = {0, 0, 0};
+	// 		// return origin;
+	// 		curr_target = 0;
+	// 		return waypoints[curr_target];
 	// 	}
-	// 	return {5.0, 5.0, -5.0};
+	// 	curr_target++;
+	// 	return waypoints[curr_target];
 	// }
-	// else 
-	// {
-	// 	this->num_calls+=1;
-	// 	return {0.0, 0.0, -5.0};
-	// }
+
+	if(this->num_calls > 50)
+	{
+		this->num_calls+=1;
+		if(this->num_calls > 100)
+		{
+			this->num_calls = 0;
+		}
+		return {5.0, 5.0, -5.0};
+	}
+	else 
+	{
+		this->num_calls+=1;
+		return {0.0, 0.0, -5.0};
+	}
 
 };
 
