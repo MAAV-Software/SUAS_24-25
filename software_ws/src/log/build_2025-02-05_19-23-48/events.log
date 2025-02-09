@@ -1,0 +1,19 @@
+[0.000000] (-) TimerEvent: {}
+[0.003580] (-) JobUnselected: {'identifier': 'example_global_navigation_cpp'}
+[0.004091] (-) JobUnselected: {'identifier': 'example_local_navigation_cpp'}
+[0.004359] (-) JobUnselected: {'identifier': 'example_mode_fw_attitude_cpp'}
+[0.004403] (-) JobUnselected: {'identifier': 'example_mode_goto_cpp'}
+[0.004452] (-) JobUnselected: {'identifier': 'example_mode_goto_global_cpp'}
+[0.004494] (-) JobUnselected: {'identifier': 'example_mode_manual_cpp'}
+[0.004521] (-) JobUnselected: {'identifier': 'example_mode_rtl_replacement_cpp'}
+[0.004548] (-) JobUnselected: {'identifier': 'example_mode_with_executor_cpp'}
+[0.004574] (-) JobUnselected: {'identifier': 'my_package'}
+[0.004599] (-) JobUnselected: {'identifier': 'px4_msgs'}
+[0.004625] (-) JobUnselected: {'identifier': 'px4_ros2_cpp'}
+[0.004650] (-) JobUnselected: {'identifier': 'turtlesim'}
+[0.004675] (-) JobUnselected: {'identifier': 'turtlesim'}
+[0.004700] (-) JobUnselected: {'identifier': 'tutorial_package'}
+[0.004731] (px4_ros_com) JobQueued: {'identifier': 'px4_ros_com', 'dependencies': OrderedDict([('px4_msgs', '/home/maav/SUAS_24-25/software_ws/src/install/px4_msgs')])}
+[0.004862] (px4_ros_com) JobStarted: {'identifier': 'px4_ros_com'}
+[0.062099] (px4_ros_com) JobEnded: {'identifier': 'px4_ros_com', 'rc': 1}
+[0.074277] (-) EventReactorShutdown: {}
