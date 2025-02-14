@@ -1,3 +1,6 @@
 /build
 /install
 /log
+/software_ws/ROS2-GPS2xyz
+/software_ws/eigen-git-mirror
+/software_ws/src/px4-ros2-interface-lib

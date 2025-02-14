@@ -76,17 +76,8 @@ public:
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
 		
-		// // figuring out how to find location // node before
-		// global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
-        //     "/fmu/out/vehicle_global_position", 10,
-        //     std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
-		
-		rclcpp::QoS qos_profile(rclcpp::KeepLast(10));
-		qos_profile.best_effort();
-		global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
-			"/fmu/out/vehicle_global_position", qos_profile,
-			std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
-
+		// setting initial reference to origin for now
+		geodetic_converter_.initialiseReference(0, 0, 0);
 
 		// getting list of waypoints
 		std::string waypointFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/way_points.txt";
@@ -97,19 +88,14 @@ public:
 		geodetic_converter_.initialiseReference(0, 0, 0);
 
 		auto node = rclcpp::Node::make_shared("vehicle_global_position_subscriber"); 
+		// auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data)); 
+		// qos.reliability(RMW_QOS); // Match this to the publisher
+		// auto subscription = node->create_subscription<VehicleGlobalPosition>("/fmu/out/vehicle_global_position", qos, 
+		// [](auto msg) { RCLCPP_INFO(this->get_logger(), "Received data: [%f, %f]", msg->lat, msg->long); });
+		global_position_subscriber_ = node->create_subscription<VehicleGlobalPosition>(
+            "/fmu/out/vehicle_global_position", 10,
+            std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
 		
-		//odometry library
-		// px4_ros2::Context context(*node, "px4/");
-		// px4_ros2::OdometryLocalPosition odometry_local_position(context);
-		
-		// Verify the pointer is initialized
-		// if (!drone_local_position_) {
-		// 	RCLCPP_ERROR(this->get_logger(), "Failed to initialize OdometryLocalPosition shared pointer");
-		// } else {
-		// 	RCLCPP_INFO(this->get_logger(), "Successfully initialized OdometryLocalPosition shared pointer");
-		// }
-
-
 
 		offboard_setpoint_counter_ = 0;
 		auto timer_callback = [this]() -> void {
@@ -122,15 +108,12 @@ public:
 				this->arm();
 			}
 
-			// position should get updated here
-			//global_position_callback();
-			RCLCPP_INFO(this->get_logger(), "Current Global Position: Latitude: %f, Longitude: %f, Altitude: %f",
-            current_x_, current_y_, current_z_);
-
 			// offboard_control_mode needs to be paired with trajectory_setpoint
 			publish_offboard_control_mode();
+
 			// get x, y, z from our points function and then publish them
 			Point result = get_point();
+
 			publish_trajectory_setpoint(result.x, result.y, result.z);
 			// RCLCPP_INFO(this->get_logger(), );
 			// sleep(10.0);
@@ -151,8 +134,6 @@ public:
 private:
 	rclcpp::TimerBase::SharedPtr timer_;
 
-	
-
 	rclcpp::Publisher<OffboardControlMode>::SharedPtr offboard_control_mode_publisher_;
 	rclcpp::Publisher<TrajectorySetpoint>::SharedPtr trajectory_setpoint_publisher_;
 	rclcpp::Publisher<VehicleCommand>::SharedPtr vehicle_command_publisher_;
@@ -160,12 +141,9 @@ private:
 	// subcription to drone's position
 	rclcpp::Subscription<VehicleGlobalPosition>::SharedPtr global_position_subscriber_;
 
-	// drone's position but different (?)
-	//px4_ros2::OdometryLocalPosition* drone_local_position_;
-
 	// list of waypoints
 	std::vector<Point> waypoints;
-	int curr_target;
+	int curr_target = 0;
 
 	std::atomic<uint64_t> timestamp_;   //!< common synced timestamped
 	double current_x_ = 0.0;
@@ -225,16 +203,6 @@ Point OffboardControl::get_point() {
 	// //if we're not there not yet, keep heading there (allowing for some deadzone[10 meters])
 	// // once we are in range, set our target waypoint to the next waypoint
 
-<<<<<<< HEAD
-	// Point curr_pos = global_position_callback(global_position_subscriber_);
-
-	// // get distance between curr_pos and curr_target
-	// Point target_point = waypoints[curr_target];
-	// double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
-	// 										pow((curr_pos.y - target_point.y), 2) + 
-	// 										pow((curr_pos.z - target_point.z), 2));
-
-=======
 	// // Trying to get curr_pos directly instead of through callback (ONLY UNCOMMENT ONE!)
 	// Point curr_pos = {current_x_, current_y_, current_z_};
 	// // Point curr_pos = global_position_callback(global_position_subscriber_);
@@ -275,26 +243,27 @@ Point OffboardControl::get_point() {
 	// // get distance between curr_pos and curr_target
 	// Point target_point = waypoints[curr_target];
 	// double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
-	// 								   pow((curr_pos.y - target_point.y), 2) + 
-	// 								   pow((curr_pos.z - target_point.z), 2));
+	// 										pow((curr_pos.y - target_point.y), 2) + 
+	// 										pow((curr_pos.z - target_point.z), 2));
 
 >>>>>>> 71bc9a6 (global position subscription is working)
-	// // if we're not close enough to target waypoint, keep going
-	// const int waypoint_range = 10;
-	// if (distance_from_target > waypoint_range) {
-	// 	return target_point;
-	// }
-	// else {
-	// 	// if we've reached the last waypoint, go back to (0, 0, 0)
-	// 	if(curr_target == waypoints.size() - 1) {
-	// 		// Point origin = {0, 0, 0};
-	// 		// return origin;
-	// 		curr_target = 0;
-	// 		return waypoints[curr_target];
-	// 	}
-	// 	curr_target++;
-	// 	return waypoints[curr_target];
-	// }
+	// if we're not close enough to target waypoint, keep going
+	const int waypoint_range = 10;
+	if (distance_from_target > waypoint_range) {
+		return target_point;
+	}
+	else {
+		// if we've reached the last waypoint, go back to (0, 0, 0)
+		if(curr_target == waypoints.size() - 1) {
+			// Point origin = {0, 0, 0};
+			// return origin;
+			curr_target = 0;
+			return waypoints[curr_target];
+		}
+		std::cout << waypoints[curr_target].x << std::endl;
+		curr_target++;
+		return waypoints[curr_target];
+	}
 
 	if(this->num_calls > 50)
 	{
@@ -310,11 +279,7 @@ Point OffboardControl::get_point() {
 		this->num_calls+=1;
 		return {0.0, 0.0, -5.0};
 	}
-<<<<<<< HEAD
-
-=======
 	// return {2.0, -100.0, 3.0};
->>>>>>> 71bc9a6 (global position subscription is working)
 };
 
 
@@ -331,10 +296,11 @@ void OffboardControl::global_position_callback(const px4_msgs::msg::VehicleGloba
     RCLCPP_INFO(this->get_logger(), "Global Position Updated: [%f, %f, %f]", current_x_, current_y_, current_z_);
 	
 	std::cout << "{PE:AASE}";
-	// Point curr_pos;
-	// curr_pos.x = current_x_;
-	// curr_pos.y = current_y_;
-	// curr_pos.z = current_z_;
+	Point curr_pos;
+	curr_pos.x = current_x_;
+	curr_pos.y = current_y_;
+	curr_pos.z = current_z_;
+	return curr_pos;
 }
 
 
@@ -406,6 +372,8 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
             waypoint.x = x;
 			waypoint.y = y;
 			waypoint.z = z;
+
+			std::cout << "Added new point: " << x << " " << y << " " << z << std::endl;
             
             waypoints.push_back(waypoint);
         }

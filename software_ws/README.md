@@ -74,3 +74,9 @@ Roscore
 
 
 ---------------------------------------------------
+
+What to do (as of 2/9/2025)
+
+ - Fix read_waypoints
+    - for some reason its making only points 0 0 0 for the vector
+    - it knows the correct number of points but doesn't actually assign them values
