@@ -33,7 +33,7 @@ Note: If drone does not load into world file, check that world definition matche
 
 Creating new random sdf (world) file
 1. cd into SUAS_24-25/software_ws/src/waypoint_generation
-2. python way_point_generation.py
+2. python3 way_point_generation.py
 3. move sdf file to /PX4-Autopilot/Tools/simulation/gz/worlds
 
 ---------------------------------------------------

@@ -52,6 +52,7 @@ class GeodeticConverter
     // Compute ECEF to NED and NED to ECEF matrices
     double phiP = atan2(initial_ecef_z_, sqrt(pow(initial_ecef_x_, 2) + pow(initial_ecef_y_, 2)));
 
+    // std::cout << "reference values are" << phiP << " "<< initial_longitude_ << " " << std::endl;
     ecef_to_ned_matrix_ = nRe(phiP, initial_longitude_);
     ned_to_ecef_matrix_ = nRe(initial_latitude_, initial_longitude_).transpose();
 
@@ -111,6 +112,8 @@ class GeodeticConverter
     vect(1) = y - initial_ecef_y_;
     vect(2) = z - initial_ecef_z_;
     ret = ecef_to_ned_matrix_ * vect;
+    // std::cout << vect(0) << " "<< vect(1) << " "<< vect(2) << " " << std::endl;
+    // std::cout << "matrix is" << ecef_to_ned_matrix_(0) << " "<< ecef_to_ned_matrix_(1) << " "<< ecef_to_ned_matrix_(2) << " " << std::endl;
     *north = ret(0);
     *east = ret(1);
     *down = -ret(2);
@@ -155,8 +158,12 @@ class GeodeticConverter
     double x, y, z;
     geodetic2Ecef(latitude, longitude, altitude, &x, &y, &z);
 
+    // std::cout << "geodetic pos to local ENU " << x << " "<< y << " "<< z << " " << std::endl;
+
     double aux_north, aux_east, aux_down;
     ecef2Ned(x, y, z, &aux_north, &aux_east, &aux_down);
+
+    // std::cout << "EPPASPAP" << aux_north << " "<< aux_east << " "<< aux_down << " " << std::endl;
 
     *east = aux_east;
     *north = aux_north;

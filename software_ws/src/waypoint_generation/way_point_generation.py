@@ -3,7 +3,7 @@ import math
 import pyproj
 import chevron
 import pymap3d as pm
-starting_coord = (0, 0, 0) # degree starting position plus height
+starting_coord = (38.31633, -76.55578, 142) # degree starting position plus height
 # total_way_points = 10
 total_distance = 3/69 # 3 miles in degrees (1 degree = 69 miles)
 minHeight = 100 # agl or would be 217 feet msl
@@ -80,9 +80,9 @@ with open('templates/world_template.mustache', 'r') as m:
     f.write(rendered_content)
     # print(rendered_content)
     
-lat0 = 0
-lon0 = 0
-h0 = 0
+lat0 = starting_coord[0]
+lon0 = starting_coord[1]
+h0 = starting_coord[2]
 
 for i in range(1, len(way_points)):
     lat = way_points[i][0]

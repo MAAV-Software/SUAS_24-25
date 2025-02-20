@@ -66,6 +66,10 @@ struct Point {
 	double x, y, z;
 };
 
+const double start_coord_lat = 38.31633;
+const double start_coord_long = -76.55578;
+const double start_coord_alt = 142;
+
 class OffboardControl : public rclcpp::Node
 {
 public:
@@ -76,26 +80,27 @@ public:
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
 		
+		// // figuring out how to find location // node before
+		// global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
+        //     "/fmu/out/vehicle_global_position", 10,
+        //     std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
+		
+		rclcpp::QoS qos_profile(rclcpp::KeepLast(10));
+		qos_profile.best_effort();
+		global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
+			"/fmu/out/vehicle_global_position", qos_profile,
+			std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
+
 		// setting initial reference to origin for now
-		geodetic_converter_.initialiseReference(0, 0, 0);
+		geodetic_converter_.initialiseReference(start_coord_lat, start_coord_long, start_coord_alt);
 
 		// getting list of waypoints
 		std::string waypointFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/way_points.txt";
 		std::vector<Point> waypoints = read_waypoints(waypointFilePath, geodetic_converter_);
 		
 		
-		// setting initial reference to origin for now
-		geodetic_converter_.initialiseReference(0, 0, 0);
 
 		auto node = rclcpp::Node::make_shared("vehicle_global_position_subscriber"); 
-		// auto qos = rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data)); 
-		// qos.reliability(RMW_QOS); // Match this to the publisher
-		// auto subscription = node->create_subscription<VehicleGlobalPosition>("/fmu/out/vehicle_global_position", qos, 
-		// [](auto msg) { RCLCPP_INFO(this->get_logger(), "Received data: [%f, %f]", msg->lat, msg->long); });
-		global_position_subscriber_ = node->create_subscription<VehicleGlobalPosition>(
-            "/fmu/out/vehicle_global_position", 10,
-            std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
-		
 
 		offboard_setpoint_counter_ = 0;
 		auto timer_callback = [this]() -> void {
@@ -160,7 +165,7 @@ private:
 	Point get_point();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
 	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
-	std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter geodetic_converter_);
+	std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_);
 };
 
 /**
@@ -242,28 +247,26 @@ Point OffboardControl::get_point() {
 	 
 	// // get distance between curr_pos and curr_target
 	// Point target_point = waypoints[curr_target];
-	// double distance_from_target = sqrt(pow((curr_pos.x - target_point.x), 2) +
+	// double distance_from_target = sqrt(pow((current_x_ - target_point.x), 2) +
 	// 										pow((curr_pos.y - target_point.y), 2) + 
 	// 										pow((curr_pos.z - target_point.z), 2));
-
->>>>>>> 71bc9a6 (global position subscription is working)
-	// if we're not close enough to target waypoint, keep going
-	const int waypoint_range = 10;
-	if (distance_from_target > waypoint_range) {
-		return target_point;
-	}
-	else {
-		// if we've reached the last waypoint, go back to (0, 0, 0)
-		if(curr_target == waypoints.size() - 1) {
-			// Point origin = {0, 0, 0};
-			// return origin;
-			curr_target = 0;
-			return waypoints[curr_target];
-		}
-		std::cout << waypoints[curr_target].x << std::endl;
-		curr_target++;
-		return waypoints[curr_target];
-	}
+	// // if we're not close enough to target waypoint, keep going
+	// const int waypoint_range = 10;
+	// if (distance_from_target > waypoint_range) {
+	// 	return target_point;
+	// }
+	// else {
+	// 	// if we've reached the last waypoint, go back to (0, 0, 0)
+	// 	if(curr_target == waypoints.size() - 1) {
+	// 		// Point origin = {0, 0, 0};
+	// 		// return origin;
+	// 		curr_target = 0;
+	// 		return waypoints[curr_target];
+	// 	}
+	// 	std::cout << waypoints[curr_target].x << std::endl;
+	// 	curr_target++;
+	// 	return waypoints[curr_target];
+	// }
 
 	if(this->num_calls > 50)
 	{
@@ -293,14 +296,14 @@ void OffboardControl::global_position_callback(const px4_msgs::msg::VehicleGloba
 	// auto message = "x: " + std::to_string(current_x_) + " y: " + std::to_string(current_y_) + " z: " + std::to_string(current_z_);
 	// RCLCPP_INFO(this->get_logger(), message.c_str());
 
-    RCLCPP_INFO(this->get_logger(), "Global Position Updated: [%f, %f, %f]", current_x_, current_y_, current_z_);
+    // RCLCPP_INFO(this->get_logger(), "Global Position Updated: [%f, %f, %f]", current_x_, current_y_, current_z_);
 	
-	std::cout << "{PE:AASE}";
-	Point curr_pos;
-	curr_pos.x = current_x_;
-	curr_pos.y = current_y_;
-	curr_pos.z = current_z_;
-	return curr_pos;
+//	std::cout << "{PE:AASE}";
+	// Point curr_pos;
+	// curr_pos.x = current_x_;
+	// curr_pos.y = current_y_;
+	// curr_pos.z = current_z_;
+	// return curr_pos;
 }
 
 
@@ -341,7 +344,7 @@ void OffboardControl::publish_vehicle_command(uint16_t command, float param1, fl
 
 
 // outputs in lat long height in meters
-std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter geodetic_converter_) {
+std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_) {
     std::ifstream file(file_path);
     std::vector<Point> waypoints;
 
@@ -350,33 +353,40 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
         std::getline(file, line);
         std::getline(file, line);
         // WGS84 ellipsoid parameters
-        const double a = 6378137.0;  // semi-major axis in meters
-        const double f = 1.0 / 298.257223563;  // flattening
+        // const double a = 6378137.0;  // semi-major axis in meters
+        // const double f = 1.0 / 298.257223563;  // flattening
 
         // GeographicLib::Geocentric earth(a, f);
         // GeographicLib::LocalCartesian proj(0, 0, 0, earth);
 
+		//get the first point, make that our origin
+		// double origin_x, origin_y, origin_z;
+		// if(std::getline(file, line)) {
+		// 	double origin_lat, origin_lon, origin_alt_ft;
+		// 	std::istringstream iss(line);
+        //     iss >> origin_lat >> origin_lon >> origin_alt_ft;
+		// 	geodetic_converter_.geodetic2Enu(origin_lat, origin_lon, origin_alt_ft*.3048, &origin_x, &origin_y, &origin_z);
+        //     waypoints.push_back({0, 0, 0});  //our first xyz is at the origin which is 0, 0, 0
+		// 	std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
+
+		// }
+
         while (std::getline(file, line)) {
             std::istringstream iss(line);
             Point waypoint;
-
+			std::cout << "how long is build time anyways?" << std::endl;
             double lat, lon, alt_ft;
             iss >> lat >> lon >> alt_ft;
-
-            double x, y, z;
-            //proj.Forward(lat, lon, alt_ft * 0.3048, x, y, z);
-
+			double x, y, z;
 
             //RCLCPP_INFO(this->get_logger(), "Reading waypoints from txt file: x=%f, y=%f, z=%f", lat, lon, alt_ft);
 			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &x, &y, &z);
             waypoint.x = x;
 			waypoint.y = y;
-			waypoint.z = z;
-
-			std::cout << "Added new point: " << x << " " << y << " " << z << std::endl;
-            
+			waypoint.z = z;	
+			std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
             waypoints.push_back(waypoint);
-        }
+        }	
         file.close();
     } else {
         //RCLCPP_ERROR(this->get_logger(), "Unable to open waypoints file");
