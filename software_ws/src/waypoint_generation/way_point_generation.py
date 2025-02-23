@@ -75,6 +75,7 @@ f = open("waypoints.world", "w")
 
 source_proj = pyproj.Proj(init='epsg:4326')  # WGS84
 target_proj = pyproj.Proj(init='epsg:3857') 
+# we changed these to absolute paths for the vscode debugger to work
 with open('templates/world_template.mustache', 'r') as m:
     rendered_content = chevron.render(m)
     f.write(rendered_content)
@@ -91,7 +92,7 @@ for i in range(1, len(way_points)):
     new_point = pm.geodetic2enu(lat, lon, h, lat0, lon0, h0)
     # x, y = pyproj.transform(source_proj, target_proj, way_points[i][0], way_points[i][1])
     with open('templates/waypoint_template.mustache', 'r') as m:
-        rendered_content = chevron.render(m, {'point': (i+1), 'x': new_point[0], 'y': new_point[1], 'z': new_point[2]*.3048})
+        rendered_content = chevron.render(m, {'point': (i+1), 'x': new_point[0], 'y': new_point[1], 'z': h*.3048})
         f.write(rendered_content)
     # f.write("\t<pose>" + str(25) + " " + str(25) + " " + str(25) + " 0 -0 0</pose>\n")
     #project the lat and long to x and y using WGS84 projection

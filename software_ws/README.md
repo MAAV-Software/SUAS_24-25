@@ -9,6 +9,7 @@ Terminal 1:
 Terminal 2:
 1. cd into PX4-Autopilot
 2. make px4_sitl gz_x500
+2.1. PX4_GZ_WORLD=<world name here> make px4_sitl gz_x500
 
 Terminal 3:
 1. cd into Downloads
@@ -75,8 +76,6 @@ Roscore
 
 ---------------------------------------------------
 
-What to do (as of 2/9/2025)
+Command for all 4 terminal setups:
 
- - Fix read_waypoints
-    - for some reason its making only points 0 0 0 for the vector
-    - it knows the correct number of points but doesn't actually assign them values
+./very_kool_script.sh [worldname]

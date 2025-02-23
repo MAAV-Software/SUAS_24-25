@@ -374,7 +374,6 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
         while (std::getline(file, line)) {
             std::istringstream iss(line);
             Point waypoint;
-			std::cout << "how long is build time anyways?" << std::endl;
             double lat, lon, alt_ft;
             iss >> lat >> lon >> alt_ft;
 			double x, y, z;
@@ -383,8 +382,9 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
 			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &x, &y, &z);
             waypoint.x = x;
 			waypoint.y = y;
-			waypoint.z = z;	
-			std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
+			// trying to give it the original altitude, we think we can just keep it this way
+			waypoint.z = alt_ft*.3048;	
+			std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << alt_ft*.3048 << std::endl;
             waypoints.push_back(waypoint);
         }	
         file.close();
