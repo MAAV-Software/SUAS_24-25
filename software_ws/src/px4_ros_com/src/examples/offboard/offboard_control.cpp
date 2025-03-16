@@ -214,7 +214,7 @@ Point OffboardControl::get_point() {
 	std::cout << "Current gps " << current_x_ << " " <<
 	current_y_ << " " << 
 	current_z_ << std::endl;
-	geodetic_converter_.geodetic2Enu(current_x_, current_y_, current_z_, &x, &y, &z);
+	geodetic_converter_.geodetic2Enu(current_x_, current_y_, current_z_, &y, &x, &z);
 	// because gazebo uses North East Down, we invert current_z_ ig
 	double distance_from_target = sqrt(pow((x- target_point.x), 2) +
 									   pow((y - target_point.y), 2) + 
@@ -359,7 +359,7 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
 
             //RCLCPP_INFO(this->get_logger(), "Reading waypoints from txt file: x=%f, y=%f, z=%f", lat, lon, alt_ft);
 			// long_lat_waypoints.push_back({lat - 38.31633, lon - (-76.55578), alt_ft*.3048});
-			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &x, &y, &z);
+			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &y, &x, &z);
             waypoint.x = x;
 			waypoint.y = y;
 			// trying to give it the original altitude, we think we can just keep it this way
