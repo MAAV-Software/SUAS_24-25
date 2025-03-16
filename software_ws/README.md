@@ -18,9 +18,9 @@ Terminal 3:
 Terminal 4:
 1. cd into SUAS_24-25/software_ws
 2. source /opt/ros/humble/setup.bash
-3. colcon build --packages-select px4_ros_com 
-4. source install/setup.bash 
-5. ros2 run px4_ros_com offboard_control
+colcon build --packages-select px4_ros_com 
+source install/setup.bash 
+ros2 run px4_ros_com offboard_control
 
 ---------------------------------------------------
 
@@ -79,3 +79,13 @@ Roscore
 Command for all 4 terminal setups:
 
 ./very_kool_script.sh [worldname]
+
+---------------------------------------------------
+
+3/12/2025
+
+Next Steps: figure out how to configure current x and y in get_point, such that 
+distance_from_target is correctly calculated
+
+we tried using geodetic_to_enu but that made our x and y comically large
+(could maybe be because our current x and y aren't adjusted in relation to origin?)

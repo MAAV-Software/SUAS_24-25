@@ -16,6 +16,7 @@
 <pose> 0 0 0 0 -0 0</pose>
 </inertial>
 <collision name='collision'>
+	<max_contacts>0</max_contacts>
 	<geometry>
 		<sphere>
 			<radius>7.62</radius>
@@ -23,7 +24,8 @@
 	</geometry>
 	<surface>
 		<contact>
-			<collide_without_contact>1</collide_without_contact>
+			<collide_without_contact>true</collide_without_contact>
+			<collide_bitmask>0</collide_bitmask>
 		</contact>
 	</surface>
 </collision>

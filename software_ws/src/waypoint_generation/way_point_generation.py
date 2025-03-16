@@ -12,7 +12,8 @@ way_points = []
 way_points.append(starting_coord)
 
 #generate a random number between 5-10
-howMany = random.randint(5, 10)
+# just setting to 10 for now
+howMany = 10
 step = total_distance/howMany
 variance = 0.00001
 distance = 0
@@ -85,7 +86,7 @@ lat0 = starting_coord[0]
 lon0 = starting_coord[1]
 h0 = starting_coord[2]
 
-for i in range(1, len(way_points)):
+for i in range(0, 11):
     lat = way_points[i][0]
     lon = way_points[i][1]
     h = way_points[i][2]
