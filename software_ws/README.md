@@ -74,3 +74,14 @@ Roscore
 
 
 ---------------------------------------------------
+
+Running on jetson
+1. cd into Micro-XRCE-DDS-Agent
+2. sudo MicroXRCEAgent serial --dev /dev/ttyUSB0 -b 921600
+
+other terminal
+1. cd into SUAS_24-25/software_ws
+2. colcon build --packages-select px4_ros_com
+3. source /opt/ros/humble/setup.bash 
+4. source install/setup.bash 
+5. ros2 run px4_ros_com offboard_control
