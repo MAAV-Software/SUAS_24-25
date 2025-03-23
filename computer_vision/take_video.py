@@ -42,17 +42,10 @@ cv2.destroyAllWindows()
 '''
 How to run in c++:
 void take_test_capture() {
-FILE* pipe = popen("python3 script.py", "r");
-    if (!pipe) {
-        std::cerr << "Error running Python script!" << std::endl;
-        return 1;
-    }
-    
-    char buffer[128];
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        std::cout << buffer;  // Print output from Python script
-    }
+    int result = system("python3 script.py");
 
-    pclose(pipe);
+    if (result != 0) {
+        std::cerr << "Script failed, but we march on" << std::endl;
+    }
 }
 '''
