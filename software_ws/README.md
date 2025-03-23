@@ -74,3 +74,7 @@ Roscore
 
 
 ---------------------------------------------------
+
+Running on jetson
+1. cd into Micro-XRCE-DDS-Agent
+2. sudo MicroXRCEAgent serial --dev /dev/ttyUSB0 -b 921600
