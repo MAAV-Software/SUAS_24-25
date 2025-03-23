@@ -10,7 +10,7 @@ frame_height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (frame_width, frame_height))
+out = cv2.VideoWriter('output_3_23.mp4', fourcc, 20.0, (frame_width, frame_height))
 
 counter = 0
 
@@ -35,3 +35,24 @@ while True:
 cam.release()
 out.release()
 cv2.destroyAllWindows()
+
+
+
+
+'''
+How to run in c++:
+void take_test_capture() {
+FILE* pipe = popen("python3 script.py", "r");
+    if (!pipe) {
+        std::cerr << "Error running Python script!" << std::endl;
+        return 1;
+    }
+    
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        std::cout << buffer;  // Print output from Python script
+    }
+
+    pclose(pipe);
+}
+'''
