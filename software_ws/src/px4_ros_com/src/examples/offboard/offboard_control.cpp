@@ -118,7 +118,8 @@ public:
 			publish_offboard_control_mode();
 
 			// get x, y, z from our points function and then publish them
-			Point result = get_point();
+			//Point result = get_point();
+			Point result = get_point_vel();
 
 			publish_trajectory_setpoint(result.x, result.y, result.z);
 			// RCLCPP_INFO(this->get_logger(), );
@@ -164,7 +165,8 @@ private:
 	
 	void publish_offboard_control_mode();
 	void publish_trajectory_setpoint(float x, float y, float z);
-	Point get_point();
+	// Point get_point();
+	Point get_point_vel();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
 	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
 	std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_);
@@ -197,13 +199,26 @@ void OffboardControl::disarm()
 void OffboardControl::publish_offboard_control_mode()
 {
 	OffboardControlMode msg{};
-	msg.position = true;
-	msg.velocity = false;
+	// We probably need velocity waypoints for fixed-wing flight
+	if(curr_target == 0) {
+		msg.position = true;
+		msg.velocity = false;
+	}
+	else {
+		msg.position = false;
+		msg.velocity = true;
+	}
+	// msg.position = true;
+	// msg.velocity = false;
 	msg.acceleration = false;
 	msg.attitude = false;
 	msg.body_rate = false;
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	offboard_control_mode_publisher_->publish(msg);
+}
+
+std::array<double, 3> OffboardControl::get_point_vel() {
+    return {1.0, 0.0, 0.0};  // Example: Move forward at 1 m/s
 }
 
 
@@ -242,6 +257,10 @@ Point OffboardControl::get_point() {
 		}
 		else {
 			curr_target++;
+			// Once we reach the first waypoint, we could switch to fixed wing here
+			if(curr_target == 1) {
+				publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_VTOL_TRANSITION, 4.0, 0.0);
+			}
 		}
 		// std::cout << waypoints[curr_target].x << std::endl;
 		return waypoints[curr_target];
@@ -291,14 +310,23 @@ void OffboardControl::global_position_callback(const px4_msgs::msg::VehicleGloba
  *        For this example, it sends a trajectory setpoint to make the
  *        vehicle hover at 5 meters with a yaw angle of 180 degrees.
  */
-void OffboardControl::publish_trajectory_setpoint(float x, float y, float z)
+// void OffboardControl::publish_trajectory_setpoint(float x, float y, float z)
+// {
+// 	TrajectorySetpoint msg{};
+// 	msg.position = {x, y, z};
+// 	msg.yaw = -3.14; // [-PI:PI]
+// 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+// 	trajectory_setpoint_publisher_->publish(msg);
+// }
+void OffboardControl::publish_trajectory_setpoint(double vx, double vy, double vz)
 {
 	TrajectorySetpoint msg{};
-	msg.position = {x, y, z};
-	msg.yaw = -3.14; // [-PI:PI]
+	msg.velocity = {vx, vy, vz}; // Velocity command in m/s
+	msg.yaw = NAN; // No yaw control
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	trajectory_setpoint_publisher_->publish(msg);
 }
+
 
 /**
  * @brief Publish vehicle commands

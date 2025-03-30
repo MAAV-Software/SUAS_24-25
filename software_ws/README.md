@@ -16,8 +16,8 @@ Terminal 3:
 2. ./QGroundControl.AppImage
 
 Terminal 4:
-1. cd into SUAS_24-25/software_ws
-2. source /opt/ros/humble/setup.bash
+cd into SUAS_24-25/software_ws
+source /opt/ros/humble/setup.bash
 colcon build --packages-select px4_ros_com 
 source install/setup.bash 
 ros2 run px4_ros_com offboard_control
@@ -78,7 +78,12 @@ Roscore
 
 Command for all 4 terminal setups:
 
-./very_kool_script.sh [worldname]
+./very_kool_script.sh
+then run sequence to open world:
+Terminal 2:
+cd PX4-Autopilot
+PX4_GZ_WORLD=airportWaypoints make px4_sitl gz_x500
+gz_x500 is the drone type (here a regular x500) a vtol would be (gz_standard_vtol)
 
 ---------------------------------------------------
 
