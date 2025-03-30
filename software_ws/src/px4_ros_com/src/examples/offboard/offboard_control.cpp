@@ -42,18 +42,9 @@
 #include <px4_msgs/msg/trajectory_setpoint.hpp>
 #include <px4_msgs/msg/vehicle_command.hpp>
 #include <px4_msgs/msg/vehicle_control_mode.hpp>
-#include <px4_msgs/msg/vehicle_global_position.hpp>
-#include "/home/maav/SUAS_24-25/software_ws/src/px4-ros2-interface-lib/px4_ros2_cpp/include/px4_ros2/odometry/local_position.hpp"
 #include <rclcpp/rclcpp.hpp>
+#include <px4_msgs/msg/mission_result.hpp>
 #include <stdint.h>
-#include <Eigen/Dense>
-#include <fstream>
-// #include <geometry_msgs/PoseStamped.h>
-#include "geodetic_conv.hpp"
-#include <cmath>
-
-// #include <GeographicLib/Geocentric.hpp>
-// #include <GeographicLib/LocalCartesian.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -62,50 +53,26 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 using namespace px4_msgs::msg;
 
-struct Point {
-	double x, y, z;
-};
-
-void print_point(Point & p) {
-	std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
-}
-
-const double start_coord_lat = 38.31633;
-const double start_coord_long = -76.55578;
-const double start_coord_alt = 142;
-
 class OffboardControl : public rclcpp::Node
 {
 public:
-	OffboardControl() : Node("offboard_control"), curr_target(0)
+	OffboardControl() : Node("offboard_control")
 	{
-		//publishers
-		geodetic_converter_.initialiseReference(start_coord_lat, start_coord_long, start_coord_alt);
+
 		offboard_control_mode_publisher_ = this->create_publisher<OffboardControlMode>("/fmu/in/offboard_control_mode", 10);
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
-		
-		// // figuring out how to find location // node before
-		// global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
-        //     "/fmu/out/vehicle_global_position", 10,
-        //     std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
-		
-		rclcpp::QoS qos_profile(rclcpp::KeepLast(10));
-		qos_profile.best_effort();
-		global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
-			"/fmu/out/vehicle_global_position", qos_profile,
-			std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
 
-		// setting initial reference to origin for now
-		// getting list of waypoints
-		std::string waypointFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/way_points.txt";
-		waypoints = read_waypoints(waypointFilePath, geodetic_converter_);
-		std::cout << waypoints.size() << std::endl;
+		mission_subscriber_ = this->create_subscription<px4_msgs::msg::MissionResult>(
+            "/fmu/out/mission_result", 10,
+            std::bind(&MissionOffboardSwitcher::mission_callback, this, std::placeholders::_1));
 
-		auto node = rclcpp::Node::make_shared("vehicle_global_position_subscriber"); 
+
 
 		offboard_setpoint_counter_ = 0;
+
 		auto timer_callback = [this]() -> void {
+
 			if (offboard_setpoint_counter_ == 10) {
 				// Change to Offboard mode after 10 setpoints
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
@@ -116,16 +83,7 @@ public:
 
 			// offboard_control_mode needs to be paired with trajectory_setpoint
 			publish_offboard_control_mode();
-
-			// get x, y, z from our points function and then publish them
-			//Point result = get_point();
-			Point result = get_point_vel();
-
-			publish_trajectory_setpoint(result.x, result.y, result.z);
-			// RCLCPP_INFO(this->get_logger(), );
-			// sleep(10.0);
-			// publish_trajectory_setpoint(5.0, 5.0, -5.0);
-			// RCLCPP_INFO(this->get_logger(), "Second waypoint published.");
+			publish_trajectory_setpoint();
 
 			// stop the counter after reaching 11
 			if (offboard_setpoint_counter_ < 11) {
@@ -144,33 +102,31 @@ private:
 	rclcpp::Publisher<OffboardControlMode>::SharedPtr offboard_control_mode_publisher_;
 	rclcpp::Publisher<TrajectorySetpoint>::SharedPtr trajectory_setpoint_publisher_;
 	rclcpp::Publisher<VehicleCommand>::SharedPtr vehicle_command_publisher_;
-
-	// subcription to drone's position
-	rclcpp::Subscription<VehicleGlobalPosition>::SharedPtr global_position_subscriber_;
-
-	// list of waypoints
-	std::vector<Point> waypoints;
-	// std::vector<Point> long_lat_waypoints;
-	int curr_target = 0;
-
+	rclcpp::Subscription<px4_msgs::msg::MissionResult>::SharedPtr mission_subscriber_;
+    
 	std::atomic<uint64_t> timestamp_;   //!< common synced timestamped
-	double current_x_ = 0.0;
-	double current_y_ = 0.0;
-	double current_z_ = 0.0; // Current position of the drone
-
 	uint64_t offboard_setpoint_counter_;   //!< counter for the number of setpoints sent
-	int num_calls;
 
-	geodetic_converter::GeodeticConverter geodetic_converter_;
-	
+	bool switched_to_offboard_ = false;
+    const int target_waypoint_ = 3;
+
 	void publish_offboard_control_mode();
-	void publish_trajectory_setpoint(float x, float y, float z);
-	// Point get_point();
-	Point get_point_vel();
+	void publish_trajectory_setpoint();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
-	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
-	std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_);
+	void mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg);
+	void switch_to_offboard();
 };
+
+	void mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg) {
+        RCLCPP_INFO(this->get_logger(), "Current waypoint: %d", msg->seq_current);
+
+        if (!switched_to_offboard_ && msg->seq_current == target_waypoint_) {
+            RCLCPP_INFO(this->get_logger(), "Reached target waypoint! Switching to Offboard Mode.");
+            switch_to_offboard();
+            switched_to_offboard_ = true;  // Prevent multiple mode switches
+        }
+    }
+
 
 /**
  * @brief Send a command to Arm the vehicle
@@ -198,134 +154,54 @@ void OffboardControl::disarm()
  */
 void OffboardControl::publish_offboard_control_mode()
 {
-	OffboardControlMode msg{};
-	// We probably need velocity waypoints for fixed-wing flight
-	if(curr_target == 0) {
-		msg.position = true;
-		msg.velocity = false;
-	}
-	else {
-		msg.position = false;
-		msg.velocity = true;
-	}
-	// msg.position = true;
-	// msg.velocity = false;
+	if (!switched_to_offboard_) return; // Only send offboard commands after switching
+
+	px4_msgs::msg::OffboardControlMode msg;
+	msg.timestamp = this->now().nanoseconds() / 1000;
+	msg.position = true;
+	msg.velocity = false;
 	msg.acceleration = false;
 	msg.attitude = false;
 	msg.body_rate = false;
-	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
-	offboard_control_mode_publisher_->publish(msg);
+
+	offboard_mode_publisher_->publish(msg);
 }
-
-std::array<double, 3> OffboardControl::get_point_vel() {
-    return {1.0, 0.0, 0.0};  // Example: Move forward at 1 m/s
-}
-
-
-Point OffboardControl::get_point() {
-	// get distance between curr_pos and curr_target
-	Point target_point = waypoints[curr_target];
-	double x, y, z;
-	std::cout << "Current gps " << current_x_ << " " <<
-	current_y_ << " " << 
-	current_z_ << std::endl;
-	geodetic_converter_.geodetic2Enu(current_x_, current_y_, current_z_, &y, &x, &z);
-	// because gazebo uses North East Down, we invert current_z_ ig
-	double distance_from_target = sqrt(pow((x- target_point.x), 2) +
-									   pow((y - target_point.y), 2) + 
-									   pow((-current_z_ - target_point.z), 2));
-	// if we're not close enough to target waypoint, keep going	
-	std::cout << "Distance from target(m): " << distance_from_target << std::endl;
-	std::cout << "Target point x, y, z ";
-	print_point(target_point);
-	std::cout << "Current x, y, z " << x << " " <<
-									  y << " " << 
-									  current_z_ << std::endl;
-
-
-	const int waypoint_range = 10;
-	if (distance_from_target > waypoint_range) {
-		return target_point;
-	}
-	else {
-		// if we've reached the last waypoint, go back to (0, 0, 0)
-		if(curr_target == waypoints.size() - 1) {
-			// Point origin = {0, 0, 0};
-			// return origin;
-			curr_target = 0;
-			return waypoints[curr_target];
-		}
-		else {
-			curr_target++;
-			// Once we reach the first waypoint, we could switch to fixed wing here
-			if(curr_target == 1) {
-				publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_VTOL_TRANSITION, 4.0, 0.0);
-			}
-		}
-		// std::cout << waypoints[curr_target].x << std::endl;
-		return waypoints[curr_target];
-	}
-
-	// if(this->num_calls > 50)
-	// {
-	// 	this->num_calls+=1;
-	// 	if(this->num_calls > 100)
-	// 	{
-	// 		this->num_calls = 0;
-	// 	}
-	// 	return {5.0, 5.0, -5.0};
-	// }
-	// else 
-	// {
-	// 	this->num_calls+=1;
-	// 	return {0.0, 0.0, -5.0};
-	// }
-	// return {2.0, -100.0, 3.0};
-};
-
-
-
-
-void OffboardControl::global_position_callback(const px4_msgs::msg::VehicleGlobalPosition::SharedPtr msg)
-{
-    current_x_ = msg->lat; // Latitude
-    current_y_ = msg->lon; // Longitude
-    current_z_ = msg->alt; // Altitude
-	// auto message = "x: " + std::to_string(current_x_) + " y: " + std::to_string(current_y_) + " z: " + std::to_string(current_z_);
-	// RCLCPP_INFO(this->get_logger(), message.c_str());
-
-    // RCLCPP_INFO(this->get_logger(), "Global Position Updated: [%f, %f, %f]", current_x_, current_y_, current_z_);
-	
-//	std::cout << "{PE:AASE}";
-	// Point curr_pos;
-	// curr_pos.x = current_x_;
-	// curr_pos.y = current_y_;
-	// curr_pos.z = current_z_;
-	// return curr_pos;
-}
-
 
 /**
  * @brief Publish a trajectory setpoint
  *        For this example, it sends a trajectory setpoint to make the
  *        vehicle hover at 5 meters with a yaw angle of 180 degrees.
  */
-// void OffboardControl::publish_trajectory_setpoint(float x, float y, float z)
-// {
-// 	TrajectorySetpoint msg{};
-// 	msg.position = {x, y, z};
-// 	msg.yaw = -3.14; // [-PI:PI]
-// 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
-// 	trajectory_setpoint_publisher_->publish(msg);
-// }
-void OffboardControl::publish_trajectory_setpoint(double vx, double vy, double vz)
+void OffboardControl::publish_trajectory_setpoint()
 {
-	TrajectorySetpoint msg{};
-	msg.velocity = {vx, vy, vz}; // Velocity command in m/s
-	msg.yaw = NAN; // No yaw control
-	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
-	trajectory_setpoint_publisher_->publish(msg);
+	if (!switched_to_offboard_) return; // Only send setpoints after switching
+
+	px4_msgs::msg::TrajectorySetpoint msg;
+	msg.timestamp = this->now().nanoseconds() / 1000;
+	msg.x = 0.0;  // Keep the drone in position
+	msg.y = 0.0;
+	msg.z = -5.0;  // Hold at 5 meters altitude
+	msg.yaw = 0.0;
+
+	setpoint_publisher_->publish(msg);
 }
+
+
+void switch_to_offboard() {
+        px4_msgs::msg::VehicleCommand msg;
+        msg.timestamp = this->now().nanoseconds() / 1000;
+        msg.command = px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE;
+        msg.param1 = 1.0;  // Main mode: Custom
+        msg.param2 = 6.0;  // Custom mode: Offboard
+        msg.target_system = 1;
+        msg.target_component = 1;
+        msg.source_system = 1;
+        msg.source_component = 1;
+        msg.from_external = true;
+
+        command_publisher_->publish(msg);
+        RCLCPP_INFO(this->get_logger(), "Sent Offboard mode command");
+    }
 
 
 /**
@@ -347,60 +223,6 @@ void OffboardControl::publish_vehicle_command(uint16_t command, float param1, fl
 	msg.from_external = true;
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	vehicle_command_publisher_->publish(msg);
-}
-
-
-// outputs in lat long height in meters
-std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_) {
-    std::ifstream file(file_path);
-    std::vector<Point> waypoints;
-
-    if (file.is_open()) {
-        std::string line;
-        std::getline(file, line);
-        std::getline(file, line);
-        // WGS84 ellipsoid parameters
-        // const double a = 6378137.0;  // semi-major axis in meters
-        // const double f = 1.0 / 298.257223563;  // flattening
-
-        // GeographicLib::Geocentric earth(a, f);
-        // GeographicLib::LocalCartesian proj(0, 0, 0, earth);
-
-		//get the first point, make that our origin
-		// double origin_x, origin_y, origin_z;
-		// if(std::getline(file, line)) {
-		// 	double origin_lat, origin_lon, origin_alt_ft;
-		// 	std::istringstream iss(line);
-        //     iss >> origin_lat >> origin_lon >> origin_alt_ft;
-		// 	geodetic_converter_.geodetic2Enu(origin_lat, origin_lon, origin_alt_ft*.3048, &origin_x, &origin_y, &origin_z);
-        //     waypoints.push_back({0, 0, 0});  //our first xyz is at the origin which is 0, 0, 0
-		// 	std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
-
-		// }
-
-        while (std::getline(file, line)) {
-            std::istringstream iss(line);
-            Point waypoint;
-            double lat, lon, alt_ft;
-            iss >> lat >> lon >> alt_ft;
-			double x, y, z;
-
-            //RCLCPP_INFO(this->get_logger(), "Reading waypoints from txt file: x=%f, y=%f, z=%f", lat, lon, alt_ft);
-			// long_lat_waypoints.push_back({lat - 38.31633, lon - (-76.55578), alt_ft*.3048});
-			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &y, &x, &z);
-            waypoint.x = x;
-			waypoint.y = y;
-			// trying to give it the original altitude, we think we can just keep it this way
-			waypoint.z = alt_ft*.3048*(-1);	
-			std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
-            waypoints.push_back(waypoint);
-        }	
-        file.close();
-    } else {
-        //RCLCPP_ERROR(this->get_logger(), "Unable to open waypoints file");
-    }
-
-    return waypoints;
 }
 
 int main(int argc, char *argv[])
