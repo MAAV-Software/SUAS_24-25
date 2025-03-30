@@ -63,9 +63,11 @@ public:
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
 
+		rclcpp::QoS qos_profile(rclcpp::KeepLast(10));
+		qos_profile.best_effort();
 		mission_subscriber_ = this->create_subscription<px4_msgs::msg::MissionResult>(
-            "/fmu/out/mission_result", 10,
-            std::bind(&MissionOffboardSwitcher::mission_callback, this, std::placeholders::_1));
+            "/fmu/out/mission_result", qos_profile,
+            std::bind(&OffboardControl::mission_callback, this, std::placeholders::_1));
 
 
 
@@ -113,10 +115,6 @@ private:
 	void publish_offboard_control_mode();
 	void publish_trajectory_setpoint();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
-	void mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg);
-	void switch_to_offboard();
-};
-
 	void mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg) {
         RCLCPP_INFO(this->get_logger(), "Current waypoint: %d", msg->seq_current);
 
@@ -126,6 +124,23 @@ private:
             switched_to_offboard_ = true;  // Prevent multiple mode switches
         }
     }
+	void switch_to_offboard() {
+			px4_msgs::msg::VehicleCommand msg;
+			msg.timestamp = this->now().nanoseconds() / 1000;
+			msg.command = px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE;
+			msg.param1 = 1.0;  // Main mode: Custom
+			msg.param2 = 6.0;  // Custom mode: Offboard
+			msg.target_system = 1;
+			msg.target_component = 1;
+			msg.source_system = 1;
+			msg.source_component = 1;
+			msg.from_external = true;
+
+			vehicle_command_publisher_->publish(msg);
+			RCLCPP_INFO(this->get_logger(), "Sent Offboard mode command");
+	}
+};
+
 
 
 /**
@@ -154,7 +169,7 @@ void OffboardControl::disarm()
  */
 void OffboardControl::publish_offboard_control_mode()
 {
-	if (!switched_to_offboard_) return; // Only send offboard commands after switching
+	//if (!switched_to_offboard_) return; // Only send offboard commands after switching
 
 	px4_msgs::msg::OffboardControlMode msg;
 	msg.timestamp = this->now().nanoseconds() / 1000;
@@ -164,7 +179,7 @@ void OffboardControl::publish_offboard_control_mode()
 	msg.attitude = false;
 	msg.body_rate = false;
 
-	offboard_mode_publisher_->publish(msg);
+	offboard_control_mode_publisher_->publish(msg);
 }
 
 /**
@@ -174,34 +189,25 @@ void OffboardControl::publish_offboard_control_mode()
  */
 void OffboardControl::publish_trajectory_setpoint()
 {
-	if (!switched_to_offboard_) return; // Only send setpoints after switching
-
-	px4_msgs::msg::TrajectorySetpoint msg;
-	msg.timestamp = this->now().nanoseconds() / 1000;
-	msg.x = 0.0;  // Keep the drone in position
-	msg.y = 0.0;
-	msg.z = -5.0;  // Hold at 5 meters altitude
-	msg.yaw = 0.0;
-
-	setpoint_publisher_->publish(msg);
+	if (!switched_to_offboard_){
+		TrajectorySetpoint msg{};
+		msg.position = {0.0, 0.0, 0.0};
+		msg.yaw = -3.14; // [-PI:PI]
+		msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+		trajectory_setpoint_publisher_->publish(msg);
+	}
+	else {
+		TrajectorySetpoint msg{};
+		msg.position = {0.0, 0.0, 50.0};
+		msg.yaw = -3.14; // [-PI:PI]
+		msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+		trajectory_setpoint_publisher_->publish(msg);
+	}
+	
+	
 }
 
 
-void switch_to_offboard() {
-        px4_msgs::msg::VehicleCommand msg;
-        msg.timestamp = this->now().nanoseconds() / 1000;
-        msg.command = px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE;
-        msg.param1 = 1.0;  // Main mode: Custom
-        msg.param2 = 6.0;  // Custom mode: Offboard
-        msg.target_system = 1;
-        msg.target_component = 1;
-        msg.source_system = 1;
-        msg.source_component = 1;
-        msg.from_external = true;
-
-        command_publisher_->publish(msg);
-        RCLCPP_INFO(this->get_logger(), "Sent Offboard mode command");
-    }
 
 
 /**
