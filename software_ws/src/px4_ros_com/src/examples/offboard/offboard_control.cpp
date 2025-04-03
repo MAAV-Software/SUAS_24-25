@@ -77,10 +77,12 @@ public:
 
 			if (offboard_setpoint_counter_ == 10) {
 				// Change to Offboard mode after 10 setpoints
-				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 4);
+
 
 				// Arm the vehicle
 				this->arm();
+
 			}
 
 			// offboard_control_mode needs to be paired with trajectory_setpoint
@@ -110,21 +112,27 @@ private:
 	uint64_t offboard_setpoint_counter_;   //!< counter for the number of setpoints sent
 
 	bool switched_to_offboard_ = false;
-    const int target_waypoint_ = 3;
+    const int target_waypoint_ = 11;
 
 	void publish_offboard_control_mode();
 	void publish_trajectory_setpoint();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
-	void mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg) {
+	void mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg);
+	void switch_to_offboard();	
+};
+
+	void OffboardControl::mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg) {
         RCLCPP_INFO(this->get_logger(), "Current waypoint: %d", msg->seq_current);
 
         if (!switched_to_offboard_ && msg->seq_current == target_waypoint_) {
             RCLCPP_INFO(this->get_logger(), "Reached target waypoint! Switching to Offboard Mode.");
+			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
             switch_to_offboard();
             switched_to_offboard_ = true;  // Prevent multiple mode switches
         }
-    }
-	void switch_to_offboard() {
+    }	
+	
+	void OffboardControl::switch_to_offboard() {
 			px4_msgs::msg::VehicleCommand msg;
 			msg.timestamp = this->now().nanoseconds() / 1000;
 			msg.command = px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE;
@@ -139,8 +147,6 @@ private:
 			vehicle_command_publisher_->publish(msg);
 			RCLCPP_INFO(this->get_logger(), "Sent Offboard mode command");
 	}
-};
-
 
 
 /**
@@ -182,6 +188,7 @@ void OffboardControl::publish_offboard_control_mode()
 	offboard_control_mode_publisher_->publish(msg);
 }
 
+
 /**
  * @brief Publish a trajectory setpoint
  *        For this example, it sends a trajectory setpoint to make the
@@ -198,7 +205,7 @@ void OffboardControl::publish_trajectory_setpoint()
 	}
 	else {
 		TrajectorySetpoint msg{};
-		msg.position = {0.0, 0.0, 50.0};
+		msg.position = {0.0, 0.0, -50.0};
 		msg.yaw = -3.14; // [-PI:PI]
 		msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 		trajectory_setpoint_publisher_->publish(msg);
