@@ -40,19 +40,19 @@ mission_plan = {
     }
 }
 
-# Add waypoints
-# Worried about all these hard coded jump ids :skull:
-mission_plan["mission"]["items"].append({
-        "AMSLAltAboveTerrain": None,
-        "Altitude": alt,
-        "AltitudeMode": 1,
-        "autoContinue": True,
-        "command": 84,
-        "doJumpId": 1,
-        "frame": 3,
-        "params": [0, 1, 0, None, lat, lon, alt],
-        "type": "SimpleItem"
-    })
+# # Add waypoints
+# # Worried about all these hard coded jump ids :skull:
+# mission_plan["mission"]["items"].append({
+#         "AMSLAltAboveTerrain": None,
+#         "Altitude": waypoints,
+#         "AltitudeMode": 1,
+#         "autoContinue": True,
+#         "command": 84,
+#         "doJumpId": 1,
+#         "frame": 3,
+#         "params": [0, 1, 0, None, lat, lon, alt],
+#         "type": "SimpleItem"
+#     })
 
 for i, (lat, lon, alt) in enumerate(waypoints):
     mission_plan["mission"]["items"].append({

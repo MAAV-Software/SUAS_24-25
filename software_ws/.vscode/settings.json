@@ -75,7 +75,9 @@
         "valarray": "cpp",
         "variant": "cpp",
         "codecvt": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "dense": "cpp",
+        "bvh": "cpp"
     },
     "cmake.sourceDirectory": "/home/maav/SUAS_24-25/software_ws/eigen-git-mirror"
 }

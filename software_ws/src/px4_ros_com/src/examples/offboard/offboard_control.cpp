@@ -44,50 +44,76 @@
 #include <px4_msgs/msg/vehicle_control_mode.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <px4_msgs/msg/mission_result.hpp>
+#include <px4_msgs/msg/vehicle_global_position.hpp>
 #include <stdint.h>
+#include <Eigen/Dense>
+#include "geodetic_conv.hpp"
+#include <cmath>
 
 #include <chrono>
 #include <iostream>
+#include <fstream>
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
 using namespace px4_msgs::msg;
+
+struct Point {
+	double x, y, z;
+};
+
+void print_point(Point & p) {
+	std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
+}
+
+const double start_coord_lat = 38.31633;
+const double start_coord_long = -76.55578;
+const double start_coord_alt = 142;
 
 class OffboardControl : public rclcpp::Node
 {
 public:
 	OffboardControl() : Node("offboard_control")
 	{
-
+		//init starting coords
+		geodetic_converter_.initialiseReference(start_coord_lat, start_coord_long, start_coord_alt);
+		
+		// publishers
 		offboard_control_mode_publisher_ = this->create_publisher<OffboardControlMode>("/fmu/in/offboard_control_mode", 10);
 		trajectory_setpoint_publisher_ = this->create_publisher<TrajectorySetpoint>("/fmu/in/trajectory_setpoint", 10);
 		vehicle_command_publisher_ = this->create_publisher<VehicleCommand>("/fmu/in/vehicle_command", 10);
 
+		//subscribers
 		rclcpp::QoS qos_profile(rclcpp::KeepLast(10));
 		qos_profile.best_effort();
-		mission_subscriber_ = this->create_subscription<px4_msgs::msg::MissionResult>(
-            "/fmu/out/mission_result", qos_profile,
-            std::bind(&OffboardControl::mission_callback, this, std::placeholders::_1));
+		global_position_subscriber_ = this->create_subscription<VehicleGlobalPosition>(
+			"/fmu/out/vehicle_global_position", qos_profile,
+			std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
 
-
-
+		std::string waypointFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/way_points.txt";
+		waypoints = read_waypoints(waypointFilePath, geodetic_converter_);
+		
 		offboard_setpoint_counter_ = 0;
-
 		auto timer_callback = [this]() -> void {
 
 			if (offboard_setpoint_counter_ == 10) {
-				// Change to Offboard mode after 10 setpoints
+				// Change to Mission mode after 10 setpoints
+				// originally set to offboard but we changed it
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 4);
-
 
 				// Arm the vehicle
 				this->arm();
 
 			}
 
-			// offboard_control_mode needs to be paired with trajectory_setpoint
+			// offboard_control_mode needs to be pavired with trajectory_setpoint
 			publish_offboard_control_mode();
 			publish_trajectory_setpoint();
+
+			// 7.62 m = 25 ft, (should usually be dist to last waypoint)
+			if (get_dist(waypoints[waypoints.size() - 1]) < 15.24) {
+				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+			}
 
 			// stop the counter after reaching 11
 			if (offboard_setpoint_counter_ < 11) {
@@ -106,32 +132,39 @@ private:
 	rclcpp::Publisher<OffboardControlMode>::SharedPtr offboard_control_mode_publisher_;
 	rclcpp::Publisher<TrajectorySetpoint>::SharedPtr trajectory_setpoint_publisher_;
 	rclcpp::Publisher<VehicleCommand>::SharedPtr vehicle_command_publisher_;
-	rclcpp::Subscription<px4_msgs::msg::MissionResult>::SharedPtr mission_subscriber_;
+
+	// subcription to drone's position
+	rclcpp::Subscription<VehicleGlobalPosition>::SharedPtr global_position_subscriber_;
     
 	std::atomic<uint64_t> timestamp_;   //!< common synced timestamped
 	uint64_t offboard_setpoint_counter_;   //!< counter for the number of setpoints sent
 
+	geodetic_converter::GeodeticConverter geodetic_converter_;
+
+	std::vector<Point> waypoints;
 	bool switched_to_offboard_ = false;
     const int target_waypoint_ = 11;
+	double current_x_ = 0.0;
+	double current_y_ = 0.0;
+	double current_z_ = 0.0;
 
 	void publish_offboard_control_mode();
 	void publish_trajectory_setpoint();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
-	void mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg);
-	void switch_to_offboard();	
+	void global_position_callback(const VehicleGlobalPosition::SharedPtr msg);
+	void switch_to_offboard();
+	double get_dist(Point target);
+	std::vector<Point> read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_);
 };
 
-	void OffboardControl::mission_callback(const px4_msgs::msg::MissionResult::SharedPtr msg) {
-        RCLCPP_INFO(this->get_logger(), "Current waypoint: %d", msg->seq_current);
-
-        if (!switched_to_offboard_ && msg->seq_current == target_waypoint_) {
-            RCLCPP_INFO(this->get_logger(), "Reached target waypoint! Switching to Offboard Mode.");
-			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
-            switch_to_offboard();
-            switched_to_offboard_ = true;  // Prevent multiple mode switches
-        }
-    }	
 	
+	void OffboardControl::global_position_callback(const px4_msgs::msg::VehicleGlobalPosition::SharedPtr msg)
+	{
+		current_x_ = msg->lat; // Latitude
+		current_y_ = msg->lon; // Longitude
+		current_z_ = msg->alt; // Altitude
+	}
+
 	void OffboardControl::switch_to_offboard() {
 			px4_msgs::msg::VehicleCommand msg;
 			msg.timestamp = this->now().nanoseconds() / 1000;
@@ -215,8 +248,6 @@ void OffboardControl::publish_trajectory_setpoint()
 }
 
 
-
-
 /**
  * @brief Publish vehicle commands
  * @param command   Command code (matches VehicleCommand and MAVLink MAV_CMD codes)
@@ -236,6 +267,54 @@ void OffboardControl::publish_vehicle_command(uint16_t command, float param1, fl
 	msg.from_external = true;
 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 	vehicle_command_publisher_->publish(msg);
+}
+
+// gets distance to target from drone's current position
+double OffboardControl::get_dist(Point target) {
+	// Have to convert pos to ENU to get dist in meters
+	double pos_x, pos_y, pos_z;
+	geodetic_converter_.geodetic2Enu(current_x_, current_y_, current_z_, &pos_y, &pos_x, &pos_z);
+
+	// for some reason we need to invert current_z_
+	// probably due to NED shenanigans
+	double distance_from_target = sqrt(pow((pos_x- target.x), 2) +
+									   pow((pos_y - target.y), 2) +
+									   pow((-current_z_ - target.z), 2));
+
+	return distance_from_target;
+}
+
+// reads in waypoints.txt from waypoint_generation
+std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path, geodetic_converter::GeodeticConverter &geodetic_converter_) {
+    std::ifstream file(file_path);
+    std::vector<Point> waypoints;
+
+    if (file.is_open()) {
+        std::string line;
+        std::getline(file, line);
+        std::getline(file, line);
+
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            Point waypoint;
+            double lat, lon, alt_ft;
+            iss >> lat >> lon >> alt_ft;
+			double x, y, z;
+
+			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &y, &x, &z);
+            waypoint.x = x;
+			waypoint.y = y;
+			// trying to give it the original altitude, we think we can just keep it this way
+			waypoint.z = alt_ft*.3048*(-1);	
+			std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
+            waypoints.push_back(waypoint);
+        }	
+        file.close();
+    } else {
+        //RCLCPP_ERROR(this->get_logger(), "Unable to open waypoints file");
+    }
+
+    return waypoints;
 }
 
 int main(int argc, char *argv[])

@@ -15,6 +15,10 @@ Terminal 3:
 1. cd into Downloads
 2. ./QGroundControl.AppImage
 
+In QGroundControl click plan (upper left)
+Then file, and open mission plan
+Finally upload (middle of header)
+
 Terminal 4:
 cd into SUAS_24-25/software_ws
 source /opt/ros/humble/setup.bash
@@ -35,7 +39,7 @@ Note: If drone does not load into world file, check that world definition matche
 Creating new random sdf (world) file
 1. cd into SUAS_24-25/software_ws/src/waypoint_generation
 2. python3 way_point_generation.py
-3. move sdf file to /PX4-Autopilot/Tools/simulation/gz/worlds
+3. move sdf file to ~/PX4-Autopilot/Tools/simulation/gz/worlds
 
 ---------------------------------------------------
 
