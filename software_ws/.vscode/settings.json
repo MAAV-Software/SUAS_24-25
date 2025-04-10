@@ -77,7 +77,20 @@
         "codecvt": "cpp",
         "regex": "cpp",
         "dense": "cpp",
-        "bvh": "cpp"
+        "bvh": "cpp",
+        "core": "cpp",
+        "iterativelinearsolvers": "cpp",
+        "pastixsupport": "cpp",
+        "superlusupport": "cpp",
+        "adolcforward": "cpp",
+        "alignedvector3": "cpp",
+        "fft": "cpp",
+        "mprealsupport": "cpp",
+        "matrixfunctions": "cpp",
+        "nonlinearoptimization": "cpp",
+        "openglsupport": "cpp",
+        "polynomials": "cpp",
+        "*.ipp": "cpp"
     },
     "cmake.sourceDirectory": "/home/maav/SUAS_24-25/software_ws/eigen-git-mirror"
 }

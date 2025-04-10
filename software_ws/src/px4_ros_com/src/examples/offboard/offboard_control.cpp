@@ -59,11 +59,11 @@ using namespace std::chrono_literals;
 using namespace px4_msgs::msg;
 
 struct Point {
-	double x, y, z;
+	double east, north, up;
 };
 
 void print_point(Point & p) {
-	std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
+	std::cout << p.east << " " << p.north << " " << p.up << " " << std::endl;
 }
 
 const double start_coord_lat = 38.31633;
@@ -113,6 +113,12 @@ public:
 			// 7.62 m = 25 ft, (should usually be dist to last waypoint)
 			if (get_dist(waypoints[waypoints.size() - 1]) < 15.24) {
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+
+				// maybe instead of do set mode, we can do this (from reference.cpp)
+				publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_VTOL_TRANSITION, 3.0, 0.0);
+			}
+			else if (get_dist(waypoints[waypoints.size() - 1]) < 45) {
+				publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_VTOL_TRANSITION, 2.0, 0.0);
 			}
 
 			// stop the counter after reaching 11
@@ -228,10 +234,11 @@ void OffboardControl::publish_offboard_control_mode()
  *        vehicle hover at 5 meters with a yaw angle of 180 degrees.
  */
 void OffboardControl::publish_trajectory_setpoint()
-{
+{ 
+	// when we switch to offboard, it automatically goes to this position
 	if (!switched_to_offboard_){
 		TrajectorySetpoint msg{};
-		msg.position = {0.0, 0.0, 0.0};
+		msg.position = {waypoints[1].east, waypoints[1].north, waypoints[1].up};
 		msg.yaw = -3.14; // [-PI:PI]
 		msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 		trajectory_setpoint_publisher_->publish(msg);
@@ -277,9 +284,9 @@ double OffboardControl::get_dist(Point target) {
 
 	// for some reason we need to invert current_z_
 	// probably due to NED shenanigans
-	double distance_from_target = sqrt(pow((pos_x- target.x), 2) +
-									   pow((pos_y - target.y), 2) +
-									   pow((-current_z_ - target.z), 2));
+	double distance_from_target = sqrt(pow((pos_x- target.east), 2) +
+									   pow((pos_y - target.north), 2) +
+									   pow((-current_z_ - target.up), 2));
 
 	return distance_from_target;
 }
@@ -299,14 +306,14 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
             Point waypoint;
             double lat, lon, alt_ft;
             iss >> lat >> lon >> alt_ft;
-			double x, y, z;
+			double east, north, up;
 
-			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &y, &x, &z);
-            waypoint.x = x;
-			waypoint.y = y;
+			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &north, &east, &up);
+            waypoint.east = east;
+			waypoint.north = north;
 			// trying to give it the original altitude, we think we can just keep it this way
-			waypoint.z = alt_ft*.3048*(-1);	
-			std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
+			waypoint.up = alt_ft*.3048*(-1);	
+			std::cout << "Added new point: " << waypoint.east << " " << waypoint.north << " " << waypoint.up << std::endl;
             waypoints.push_back(waypoint);
         }	
         file.close();

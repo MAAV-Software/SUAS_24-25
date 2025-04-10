@@ -63,11 +63,11 @@ using namespace std::chrono_literals;
 using namespace px4_msgs::msg;
 
 struct Point {
-	double x, y, z;
+	double east, north, up;
 };
 
 void print_point(Point & p) {
-	std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
+	std::cout << p.east << " " << p.north << " " << p.up << " " << std::endl;
 }
 
 const double start_coord_lat = 38.31633;
@@ -117,11 +117,11 @@ public:
 			// offboard_control_mode needs to be paired with trajectory_setpoint
 			publish_offboard_control_mode();
 
-			// get x, y, z from our points function and then publish them
+			// get east, north, up from our points function and then publish them
 			//Point result = get_point();
 			Point result = get_point_vel();
 
-			publish_trajectory_setpoint(result.x, result.y, result.z);
+			publish_trajectory_setpoint(result.east, result.north, result.up);
 			// RCLCPP_INFO(this->get_logger(), );
 			// sleep(10.0);
 			// publish_trajectory_setpoint(5.0, 5.0, -5.0);
@@ -164,7 +164,7 @@ private:
 	geodetic_converter::GeodeticConverter geodetic_converter_;
 	
 	void publish_offboard_control_mode();
-	void publish_trajectory_setpoint(float x, float y, float z);
+	void publish_trajectory_setpoint(float east, float north, float up);
 	// Point get_point();
 	Point get_point_vel();
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0);
@@ -225,21 +225,21 @@ std::array<double, 3> OffboardControl::get_point_vel() {
 Point OffboardControl::get_point() {
 	// get distance between curr_pos and curr_target
 	Point target_point = waypoints[curr_target];
-	double x, y, z;
+	double east, north, up;
 	std::cout << "Current gps " << current_x_ << " " <<
 	current_y_ << " " << 
 	current_z_ << std::endl;
-	geodetic_converter_.geodetic2Enu(current_x_, current_y_, current_z_, &y, &x, &z);
+	geodetic_converter_.geodetic2Enu(current_x_, current_y_, current_z_, &north, &east, &up);
 	// because gazebo uses North East Down, we invert current_z_ ig
-	double distance_from_target = sqrt(pow((x- target_point.x), 2) +
-									   pow((y - target_point.y), 2) + 
-									   pow((-current_z_ - target_point.z), 2));
+	double distance_from_target = sqrt(pow((east- target_point.east), 2) +
+									   pow((north - target_point.north), 2) + 
+									   pow((-current_z_ - target_point.up), 2));
 	// if we're not close enough to target waypoint, keep going	
 	std::cout << "Distance from target(m): " << distance_from_target << std::endl;
-	std::cout << "Target point x, y, z ";
+	std::cout << "Target point east, north, up ";
 	print_point(target_point);
-	std::cout << "Current x, y, z " << x << " " <<
-									  y << " " << 
+	std::cout << "Current east, north, up " << east << " " <<
+									  north << " " << 
 									  current_z_ << std::endl;
 
 
@@ -262,7 +262,7 @@ Point OffboardControl::get_point() {
 				publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_VTOL_TRANSITION, 4.0, 0.0);
 			}
 		}
-		// std::cout << waypoints[curr_target].x << std::endl;
+		// std::cout << waypoints[curr_target].east << std::endl;
 		return waypoints[curr_target];
 	}
 
@@ -291,16 +291,16 @@ void OffboardControl::global_position_callback(const px4_msgs::msg::VehicleGloba
     current_x_ = msg->lat; // Latitude
     current_y_ = msg->lon; // Longitude
     current_z_ = msg->alt; // Altitude
-	// auto message = "x: " + std::to_string(current_x_) + " y: " + std::to_string(current_y_) + " z: " + std::to_string(current_z_);
+	// auto message = "east: " + std::to_string(current_x_) + " north: " + std::to_string(current_y_) + " up: " + std::to_string(current_z_);
 	// RCLCPP_INFO(this->get_logger(), message.c_str());
 
     // RCLCPP_INFO(this->get_logger(), "Global Position Updated: [%f, %f, %f]", current_x_, current_y_, current_z_);
 	
 //	std::cout << "{PE:AASE}";
 	// Point curr_pos;
-	// curr_pos.x = current_x_;
-	// curr_pos.y = current_y_;
-	// curr_pos.z = current_z_;
+	// curr_pos.east = current_x_;
+	// curr_pos.north = current_y_;
+	// curr_pos.up = current_z_;
 	// return curr_pos;
 }
 
@@ -310,10 +310,10 @@ void OffboardControl::global_position_callback(const px4_msgs::msg::VehicleGloba
  *        For this example, it sends a trajectory setpoint to make the
  *        vehicle hover at 5 meters with a yaw angle of 180 degrees.
  */
-// void OffboardControl::publish_trajectory_setpoint(float x, float y, float z)
+// void OffboardControl::publish_trajectory_setpoint(float east, float north, float up)
 // {
 // 	TrajectorySetpoint msg{};
-// 	msg.position = {x, y, z};
+// 	msg.position = {east, north, up};
 // 	msg.yaw = -3.14; // [-PI:PI]
 // 	msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 // 	trajectory_setpoint_publisher_->publish(msg);
@@ -374,7 +374,7 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
         //     iss >> origin_lat >> origin_lon >> origin_alt_ft;
 		// 	geodetic_converter_.geodetic2Enu(origin_lat, origin_lon, origin_alt_ft*.3048, &origin_x, &origin_y, &origin_z);
         //     waypoints.push_back({0, 0, 0});  //our first xyz is at the origin which is 0, 0, 0
-		// 	std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
+		// 	std::cout << "Added new point: " << waypoint.east << " " << waypoint.north << " " << waypoint.up << std::endl;
 
 		// }
 
@@ -383,16 +383,16 @@ std::vector<Point> OffboardControl::read_waypoints(const std::string& file_path,
             Point waypoint;
             double lat, lon, alt_ft;
             iss >> lat >> lon >> alt_ft;
-			double x, y, z;
+			double east, north, up;
 
-            //RCLCPP_INFO(this->get_logger(), "Reading waypoints from txt file: x=%f, y=%f, z=%f", lat, lon, alt_ft);
+            //RCLCPP_INFO(this->get_logger(), "Reading waypoints from txt file: east=%f, north=%f, up=%f", lat, lon, alt_ft);
 			// long_lat_waypoints.push_back({lat - 38.31633, lon - (-76.55578), alt_ft*.3048});
-			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &y, &x, &z);
-            waypoint.x = x;
-			waypoint.y = y;
+			geodetic_converter_.geodetic2Enu(lat, lon, alt_ft*.3048, &north, &east, &up);
+            waypoint.east = east;
+			waypoint.north = north;
 			// trying to give it the original altitude, we think we can just keep it this way
-			waypoint.z = alt_ft*.3048*(-1);	
-			std::cout << "Added new point: " << waypoint.x << " " << waypoint.y << " " << waypoint.z << std::endl;
+			waypoint.up = alt_ft*.3048*(-1);	
+			std::cout << "Added new point: " << waypoint.east << " " << waypoint.north << " " << waypoint.up << std::endl;
             waypoints.push_back(waypoint);
         }	
         file.close();
