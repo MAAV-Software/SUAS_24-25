@@ -98,3 +98,9 @@ distance_from_target is correctly calculated
 
 we tried using geodetic_to_enu but that made our x and y comically large
 (could maybe be because our current x and y aren't adjusted in relation to origin?)
+
+----------------------------------------------------
+
+4/13/2025
+
+GPS coords of Milan: 42.0916, -83.6535

@@ -66,8 +66,8 @@ void print_point(Point & p) {
 	std::cout << p.east << " " << p.north << " " << p.up << " " << std::endl;
 }
 
-const double start_coord_lat = 38.31633;
-const double start_coord_long = -76.55578;
+const double start_coord_lat = 42.092160;
+const double start_coord_long = -83.658057;
 const double start_coord_alt = 142;
 
 class OffboardControl : public rclcpp::Node
@@ -75,7 +75,7 @@ class OffboardControl : public rclcpp::Node
 public:
 	OffboardControl() : Node("offboard_control")
 	{
-		//init starting coords
+		//init starting coords (!!! SET TO MILAN PARK !!!)
 		geodetic_converter_.initialiseReference(start_coord_lat, start_coord_long, start_coord_alt);
 		
 		// publishers
@@ -90,8 +90,13 @@ public:
 			"/fmu/out/vehicle_global_position", qos_profile,
 			std::bind(&OffboardControl::global_position_callback, this, std::placeholders::_1));
 
-		std::string waypointFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/way_points.txt";
+		// !!! SETTING FILE PATH TO MILAN FOR PROOF OF FLIGHT TEST !!!
+		std::string waypointFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/milan_flight_path.txt";
 		waypoints = read_waypoints(waypointFilePath, geodetic_converter_);
+
+		// waypoints used for offboard flight to take pictures
+		std::string airdropFilePath = "/home/maav/SUAS_24-25/software_ws/src/waypoint_generation/runway_points.txt";
+		airdropRunway = read_waypoints(airdropFilePath, geodetic_converter_);
 		
 		offboard_setpoint_counter_ = 0;
 		auto timer_callback = [this]() -> void {
@@ -148,6 +153,7 @@ private:
 	geodetic_converter::GeodeticConverter geodetic_converter_;
 
 	std::vector<Point> waypoints;
+	std::vector<Point> airdropRunway;
 	bool switched_to_offboard_ = false;
     const int target_waypoint_ = 11;
 	double current_x_ = 0.0;
@@ -236,6 +242,8 @@ void OffboardControl::publish_offboard_control_mode()
 void OffboardControl::publish_trajectory_setpoint()
 { 
 	// when we switch to offboard, it automatically goes to this position
+	// we want to modify this function to navigate across the airdrop runway
+	// drone should stop at given waypoints to take a picture before continuing along path
 	if (!switched_to_offboard_){
 		TrajectorySetpoint msg{};
 		msg.position = {waypoints[1].east, waypoints[1].north, waypoints[1].up};

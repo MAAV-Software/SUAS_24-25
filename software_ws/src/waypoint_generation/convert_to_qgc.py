@@ -1,7 +1,7 @@
 import json
 
 # Input and output file names
-input_file = "way_points.txt"
+input_file = "milan_flight_path.txt"
 output_file = "qgc_points.plan"
 
 # Read waypoints from the text file
@@ -94,4 +94,4 @@ mission_plan["mission"]["items"].append({
 with open(output_file, "w") as f:
     json.dump(mission_plan, f, indent=4)
 
-print(f"Mission plan saved as {output_file} (Now includes geoFence and rallyPoints).")
+print(f"Mission plan saved as {output_file} (!!! TAKING milan_points.txt AS INPUT !!!).")
