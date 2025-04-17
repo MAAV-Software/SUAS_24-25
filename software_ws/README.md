@@ -83,6 +83,7 @@ Roscore
 Command for all 4 terminal setups:
 
 ./very_kool_script.sh
+./open_wrld.sh <world name>
 then run sequence to open world:
 Terminal 2:
 cd PX4-Autopilot

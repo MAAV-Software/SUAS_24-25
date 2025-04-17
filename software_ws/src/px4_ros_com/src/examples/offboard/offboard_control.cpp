@@ -76,6 +76,7 @@ public:
 	OffboardControl() : Node("offboard_control")
 	{
 		//init starting coords (!!! SET TO MILAN PARK !!!)
+		
 		geodetic_converter_.initialiseReference(start_coord_lat, start_coord_long, start_coord_alt);
 		
 		// publishers
@@ -117,6 +118,7 @@ public:
 
 			// 7.62 m = 25 ft, (should usually be dist to last waypoint)
 			if (get_dist(waypoints[waypoints.size() - 1]) < 15.24) {
+				start_timer = true;
 				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
 
 				// maybe instead of do set mode, we can do this (from reference.cpp)
@@ -124,6 +126,15 @@ public:
 			}
 			else if (get_dist(waypoints[waypoints.size() - 1]) < 45) {
 				publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_VTOL_TRANSITION, 2.0, 0.0);
+			}
+
+			// set to mission mode after we reach 2nd waypoint again
+			if (start_timer && transition_timer < 101) {
+				transition_timer++;
+			}
+
+			if (transition_timer == 100) {
+				this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 4);
 			}
 
 			// stop the counter after reaching 11
@@ -149,6 +160,8 @@ private:
     
 	std::atomic<uint64_t> timestamp_;   //!< common synced timestamped
 	uint64_t offboard_setpoint_counter_;   //!< counter for the number of setpoints sent
+	bool start_timer = false;
+	int transition_timer = 0;
 
 	geodetic_converter::GeodeticConverter geodetic_converter_;
 
@@ -244,22 +257,20 @@ void OffboardControl::publish_trajectory_setpoint()
 	// when we switch to offboard, it automatically goes to this position
 	// we want to modify this function to navigate across the airdrop runway
 	// drone should stop at given waypoints to take a picture before continuing along path
-	if (!switched_to_offboard_){
+	if (!switched_to_offboard_) {
 		TrajectorySetpoint msg{};
 		msg.position = {waypoints[1].east, waypoints[1].north, waypoints[1].up};
 		msg.yaw = -3.14; // [-PI:PI]
 		msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 		trajectory_setpoint_publisher_->publish(msg);
+
+		// if (get_dist(waypoints[waypoints.size() - 1]) < 15.24) {
+		// 	this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+
+		// 	// maybe instead of do set mode, we can do this (from reference.cpp)
+		// 	publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_VTOL_TRANSITION, 3.0, 0.0);
+		// }
 	}
-	else {
-		TrajectorySetpoint msg{};
-		msg.position = {0.0, 0.0, -50.0};
-		msg.yaw = -3.14; // [-PI:PI]
-		msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
-		trajectory_setpoint_publisher_->publish(msg);
-	}
-	
-	
 }
 
 
